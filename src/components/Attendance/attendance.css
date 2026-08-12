@@ -1,0 +1,568 @@
+/* Floating Button */
+.floating-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.floating-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+}
+
+.floating-button.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.8);
+}
+
+.floating-button.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 30px rgba(102, 126, 234, 0.8);
+  }
+  100% {
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  }
+}
+
+.button-icon {
+  font-size: 1.2rem;
+}
+
+.button-text {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* API Status Dot */
+.api-status-dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid white;
+  animation: status-pulse 2s infinite;
+}
+
+@keyframes status-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 4px rgba(76, 175, 80, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+/* Already Marked Styles */
+.floating-button.already-marked {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  cursor: default;
+}
+
+.floating-button.already-marked:hover {
+  transform: none;
+  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);
+}
+
+.already-marked-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  animation: marked-pulse 2s infinite;
+}
+
+@keyframes marked-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+/* Floating Timer */
+.floating-timer {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  max-width: 320px;
+  width: 90vw;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.floating-timer.collapsed {
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.8) translateY(20px);
+}
+
+.floating-timer.expanded {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1) translateY(0);
+}
+
+/* Already Marked Timer */
+.floating-timer.already-marked .timer-header {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+}
+
+.floating-timer.already-marked .timer-content {
+  background: #f8fff8;
+}
+
+/* Timer Header */
+.timer-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.timer-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.close-button {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+/* Timer Content */
+.timer-content {
+  padding: 20px;
+  background: white;
+  color: #333;
+}
+
+.timer-display {
+  font-size: 3rem;
+  text-align: center;
+  margin: 20px 0;
+  font-weight: 700;
+  color: #2c3e50;
+  font-family: "Courier New", monospace;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+  height: 6px;
+  background-color: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 25px 0;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.progress {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  transition: width 0.5s ease;
+  border-radius: 3px;
+}
+
+/* Already Marked Progress Bar */
+.floating-timer.already-marked .progress-bar {
+  background-color: #e8f5e8;
+}
+
+.floating-timer.already-marked .progress {
+  background: linear-gradient(90deg, #4caf50, #45a049);
+  width: 100% !important;
+}
+
+/* API Status Display */
+.api-status {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 15px 0;
+  padding: 10px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.api-status.sending {
+  background-color: #fff3cd;
+  color: #856404;
+  border-color: #ffeaa7;
+  animation: subtle-pulse 1.5s infinite;
+}
+
+.api-status.success {
+  background-color: #d1edff;
+  color: #0c5460;
+  border-color: #bee5eb;
+}
+
+.api-status.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes subtle-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.status {
+  text-align: center;
+  margin: 15px 0;
+  font-size: 0.9rem;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.live-indicator {
+  color: #28a745;
+  font-size: 1rem;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0.3;
+  }
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 25px 0;
+}
+
+.control-btn {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  flex: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.control-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.control-btn:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.start-btn {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+}
+
+.start-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #218838, #1ea085);
+}
+
+.pause-btn {
+  background: linear-gradient(135deg, #ffc107, #fd7e14);
+  color: white;
+}
+
+.pause-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e0a800, #e65c19);
+}
+
+.reset-btn {
+  background: linear-gradient(135deg, #dc3545, #e83e8c);
+  color: white;
+}
+
+.reset-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c82333, #d91a7a);
+}
+
+/* Already Marked Controls */
+.floating-timer.already-marked .control-btn:disabled {
+  background: linear-gradient(135deg, #cccccc, #999999);
+  color: #666666;
+}
+
+.time-presets {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+}
+
+.preset-label {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.preset-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.preset-btn {
+  padding: 8px 12px;
+  border: 1px solid #667eea;
+  background: white;
+  color: #667eea;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.8rem;
+  font-weight: 500;
+  flex: 1;
+}
+
+.preset-btn:hover:not(:disabled) {
+  background: #667eea;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.preset-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  border-color: #cccccc;
+  color: #cccccc;
+}
+
+/* Already Marked Preset Buttons */
+.floating-timer.already-marked .preset-btn {
+  border-color: #cccccc;
+  color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Already Marked Message */
+.already-marked-message {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8fff8, #e8f5e8);
+  border-radius: 10px;
+  margin: 10px 0;
+}
+
+.already-marked-message .success-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  animation: success-bounce 1s ease-in-out;
+}
+
+@keyframes success-bounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+.already-marked-message h3 {
+  color: #4caf50;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.already-marked-message p {
+  color: #666;
+  margin-bottom: 8px;
+  line-height: 1.4;
+  font-size: 0.9rem;
+}
+
+/* Animation for timer end */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+.timer-ended {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .floating-button {
+    bottom: 15px;
+    right: 15px;
+    padding: 10px 16px;
+    min-width: 100px;
+  }
+
+  .api-status-dot,
+  .already-marked-dot {
+    top: 8px;
+    right: 8px;
+    width: 6px;
+    height: 6px;
+  }
+
+  .floating-timer {
+    bottom: 15px;
+    right: 15px;
+    left: 15px;
+    width: auto;
+    max-width: none;
+  }
+
+  .timer-display {
+    font-size: 2.5rem;
+  }
+
+  .controls {
+    flex-direction: column;
+  }
+
+  .preset-buttons {
+    flex-direction: column;
+  }
+
+  .api-status {
+    font-size: 12px;
+    padding: 8px;
+    margin: 10px 0;
+  }
+
+  .already-marked-message {
+    padding: 15px;
+  }
+
+  .already-marked-message .success-icon {
+    font-size: 36px;
+  }
+}
+
+/* Backdrop for mobile */
+@media (max-width: 768px) {
+  .floating-timer.expanded::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+  }
+}
+
+/* Success state animations */
+.success-pulse {
+  animation: success-pulse 2s infinite;
+}
+
+@keyframes success-pulse {
+  0% {
+    box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 30px rgba(76, 175, 80, 0.8);
+  }
+  100% {
+    box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);
+  }
+}

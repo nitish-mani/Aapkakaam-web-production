@@ -1,0 +1,510 @@
+/* ============ CARD STYLES ============ */
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  text-align: center;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.card-header h3 {
+  font-size: 28px;
+  color: #2d3748;
+  margin: 0;
+}
+
+.discount-badge {
+  background: #48bb78;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.original-price {
+  color: #a0aec0;
+  font-size: 16px;
+  margin: 5px 0;
+}
+
+.discount {
+  color: #48bb78;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 5px 0 15px;
+}
+
+/* ============ PAY BUTTON ============ */
+.pay-button {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pay-button:hover:not(:disabled) {
+  background: #4338ca;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+}
+
+.pay-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ============ PRICING CONTAINER - GRID ============ */
+.pricing-container {
+  display: grid;
+  gap: 20px;
+  padding: 20px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ============ ANIMATION ============ */
+.animate-fadeInUp {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================ */
+/* ============ RESPONSIVE BREAKPOINTS ============ */
+/* ============================================ */
+
+/* ============ EXTRA SMALL DEVICES (Portrait Phones) ============ */
+@media (max-width: 480px) {
+  .pricing-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .card {
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .card-header h3 {
+    font-size: 20px;
+  }
+
+  .discount-badge {
+    font-size: 10px;
+    padding: 3px 10px;
+  }
+
+  .original-price {
+    font-size: 14px;
+  }
+
+  .discount {
+    font-size: 12px;
+    margin: 3px 0 10px;
+  }
+
+  .pay-button {
+    font-size: 14px;
+    padding: 10px 16px;
+    min-height: 42px;
+  }
+
+  .pay-button .loading {
+    width: 18px;
+    height: 18px;
+  }
+
+  .loading {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* ============ SMALL DEVICES (Landscape Phones) ============ */
+@media (min-width: 481px) and (max-width: 767px) {
+  .pricing-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .card-header h3 {
+    font-size: 22px;
+  }
+
+  .pay-button {
+    font-size: 14px;
+    padding: 11px 20px;
+  }
+}
+
+/* ============ MEDIUM DEVICES (Tablets) ============ */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .pricing-container {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .card {
+    padding: 18px;
+  }
+
+  .card-header h3 {
+    font-size: 24px;
+  }
+
+  .pay-button {
+    font-size: 15px;
+    padding: 12px 24px;
+  }
+}
+
+/* ============ LARGE DEVICES (Small Laptops/Desktops) ============ */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .pricing-container {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    padding: 18px;
+  }
+
+  .card-header h3 {
+    font-size: 26px;
+  }
+}
+
+/* ============ EXTRA LARGE DEVICES (Large Desktops) ============ */
+@media (min-width: 1280px) {
+  .pricing-container {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    padding: 24px;
+  }
+}
+
+/* ============ 2K+ SCREENS ============ */
+@media (min-width: 1920px) {
+  .pricing-container {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+    padding: 30px;
+    max-width: 1600px;
+  }
+
+  .card {
+    padding: 28px;
+    border-radius: 16px;
+  }
+
+  .card-header h3 {
+    font-size: 32px;
+  }
+
+  .pay-button {
+    font-size: 18px;
+    padding: 14px 36px;
+  }
+}
+
+/* ============ HORIZONTAL ORIENTATION FOR MOBILE ============ */
+@media (max-height: 600px) and (orientation: landscape) {
+  .pricing-container {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .card {
+    padding: 10px;
+  }
+
+  .card-header h3 {
+    font-size: 18px;
+  }
+
+  .discount-badge {
+    font-size: 9px;
+    padding: 2px 8px;
+  }
+
+  .original-price {
+    font-size: 12px;
+  }
+
+  .discount {
+    font-size: 10px;
+    margin: 2px 0 6px;
+  }
+
+  .pay-button {
+    font-size: 12px;
+    padding: 8px 12px;
+    min-height: 32px;
+  }
+
+  .pay-button .loading {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* ============ DARK MODE SUPPORT ============ */
+@media (prefers-color-scheme: dark) {
+  .card {
+    background: #1a202c;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  }
+
+  .card-header h3 {
+    color: #e2e8f0;
+  }
+
+  .original-price {
+    color: #718096;
+  }
+
+  .discount {
+    color: #68d391;
+  }
+
+  .loading {
+    border-color: rgba(79, 70, 229, 0.2);
+  }
+}
+
+/* ============ REDUCED MOTION PREFERENCES ============ */
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+
+  .pay-button {
+    transition: none;
+  }
+
+  .pay-button:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .animate-fadeInUp {
+    animation: none;
+  }
+
+  .loading {
+    animation-duration: 1.5s;
+  }
+}
+
+/* ============ HIGH DPI / RETINA DISPLAYS ============ */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .card {
+    border: 0.5px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .discount-badge {
+    border: 0.5px solid rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* ============ PRINT STYLES ============ */
+@media print {
+  .pay-button {
+    background: #4f46e5 !important;
+    color: white !important;
+  }
+
+  .card {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #ddd;
+  }
+
+  .card:hover {
+    transform: none !important;
+  }
+}
+
+/* ============ CONTAINER QUERY SUPPORT (Modern Browsers) ============ */
+@container (max-width: 400px) {
+  .pricing-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 8px;
+  }
+}
+
+@container (min-width: 401px) and (max-width: 600px) {
+  .pricing-container {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+}
+
+/* ============ VIEWPORT-RELATED FIXES ============ */
+@supports (aspect-ratio: 1/1) {
+  .card {
+    aspect-ratio: auto;
+    min-height: 200px;
+  }
+}
+
+/* ============ SAFE AREA INSETS (Notch Devices) ============ */
+@supports (padding: max(0px)) {
+  .pricing-container {
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
+  }
+}
+
+/* ============ TOUCH DEVICES ============ */
+@media (hover: none) {
+  .card:hover {
+    transform: none;
+  }
+
+  .pay-button:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .pay-button:active:not(:disabled) {
+    transform: scale(0.96);
+    background: #4338ca;
+  }
+}
+
+/* ============ ACCESSIBILITY: HIGH CONTRAST ============ */
+@media (prefers-contrast: high) {
+  .card {
+    border: 2px solid #2d3748;
+  }
+
+  .pay-button {
+    border: 2px solid #1a202c;
+  }
+
+  .discount-badge {
+    background: #2f855a;
+  }
+
+  .loading {
+    border-color: #4f46e5;
+  }
+}
+
+/* ============ RESPONSIVE PAYMENT ERROR ============ */
+.payment-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  text-align: center;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .payment-error {
+    font-size: 13px;
+    padding: 10px;
+    flex-direction: column;
+  }
+}
+
+/* ============ RESPONSIVE VIEWS-P CONTAINER ============ */
+.views-P {
+  width: 100%;
+  max-width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .views-P {
+    padding: 10px;
+  }
+}
+
+/* ============ FLEXIBLE CARD GRID (Fallback) ============ */
+@supports not (display: grid) {
+  .pricing-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .card {
+    flex: 0 0 calc(25% - 20px);
+    margin: 10px;
+    min-width: 200px;
+  }
+
+  @media (max-width: 768px) {
+    .card {
+      flex: 0 0 calc(33.33% - 20px);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .card {
+      flex: 0 0 calc(50% - 20px);
+      min-width: 140px;
+    }
+  }
+}

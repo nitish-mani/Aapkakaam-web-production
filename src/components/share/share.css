@@ -1,0 +1,28 @@
+.share {
+  margin: 5rem auto;
+  width: 25rem;
+  height: 40rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+.share button {
+  border: none;
+  background-color: #fff;
+  border: 1px solid blue;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.share button:hover {
+  box-shadow: 0 1px 4px blue;
+}
+
+.share button img {
+  width: 5rem;
+}
+@media screen and (max-width: 600px) {
+  .share {
+    margin-top: 5rem;
+  }
+}

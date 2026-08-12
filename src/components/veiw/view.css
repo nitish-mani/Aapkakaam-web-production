@@ -1,0 +1,127 @@
+.views-P {
+  position: relative;
+  margin: 3rem auto;
+  width: 80vw;
+}
+
+.views-P > img {
+  width: 2rem;
+  height: 2rem;
+  position: absolute;
+  top: -1rem;
+  right: 1rem;
+  cursor: pointer;
+}
+
+.views {
+  margin-top: 5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  min-height: 40rem;
+
+  justify-content: space-between;
+  position: relative;
+}
+#views_child {
+  width: 100%;
+  position: absolute;
+  top: -5rem;
+  padding: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+}
+.views-children {
+  border: 2px solid #dee2e6;
+  height: max-content;
+  margin: 3rem 1rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px #dee2e6;
+  position: relative;
+}
+.views-children div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 1rem;
+}
+.pageHandler {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+@media screen and (max-width: 1160px) {
+  .views {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media screen and (max-width: 800px) {
+  .views {
+    font-size: 1.5rem;
+  }
+}
+@media screen and (max-width: 665px) {
+  .views {
+    font-size: 1.3rem;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .views {
+    display: grid;
+    grid-template-columns: 1fr;
+    font-size: 1.7rem;
+  }
+  .bookings > div:first-child {
+    width: 30rem;
+    font-size: 1.5rem;
+  }
+  .views-P {
+    margin-top: 3rem;
+  }
+  .views-P h1 {
+    font-size: 3rem;
+  }
+  .views-P img {
+    width: 1.8rem;
+    height: 1.8rem;
+    top: 0rem;
+  }
+}
+@media screen and (max-width: 388px) {
+  .views-P h1 {
+    font-size: 2.5rem;
+  }
+  .views-P img {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+}
+@media screen and (max-width: 368px) {
+  .views {
+    font-size: 1.5rem;
+  }
+}
+@media screen and (max-width: 338px) {
+  .views {
+    font-size: 1.3rem;
+  }
+}
+@media screen and (max-width: 325px) {
+  .views-P h1 {
+    font-size: 2.2rem;
+  }
+  .views-P img {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+  #views_child {
+    flex-direction: column;
+  }
+}
+@media screen and (max-width: 297px) {
+  .views {
+    font-size: 1.1rem;
+  }
+}

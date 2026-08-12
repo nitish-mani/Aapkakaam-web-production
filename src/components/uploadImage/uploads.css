@@ -1,0 +1,64 @@
+.uploads {
+  width: 80vw;
+  min-height: 50rem;
+  margin: 2rem auto;
+  /* border: 2px solid black; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.uploads-child {
+  position: relative;
+  text-align: center;
+  box-shadow: 0 2px 4px black;
+  padding: 3rem;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.uploads-child div {
+  width: 28rem;
+  margin: 1rem auto;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.uploads-child input {
+  display: none;
+}
+.uploads-child .label {
+  font-size: 1.2rem;
+  border: 2px solid black;
+  border-radius: 5px;
+  padding: 5px;
+}
+.uploads-child .uploadProgress {
+  position: absolute;
+  height: 100%;
+  left: 0;
+  background-color: green;
+}
+.uploads-child .percentUpload {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+.uploads-child button {
+  width: 100%;
+  height: 4rem;
+}
+@media screen and (max-width: 400px) {
+  .uploads-child {
+    width: 25rem;
+  }
+  .uploads-child div {
+    width: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .uploads-child span {
+    width: fit-content;
+  }
+}

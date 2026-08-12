@@ -1,0 +1,104 @@
+.payment-failed-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  padding: 20px;
+}
+
+.failed-card {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.failed-icon {
+  font-size: 80px;
+  margin-bottom: 20px;
+}
+
+.failed-card h1 {
+  color: #2d3748;
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.failed-card > p {
+  color: #718096;
+  margin-bottom: 25px;
+}
+
+.failure-reasons {
+  text-align: left;
+  background: #fff5f5;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+}
+
+.failure-reasons h3 {
+  color: #c53030;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.failure-reasons ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #4a5568;
+}
+
+.failure-reasons li {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.button-group {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.retry-button,
+.support-button {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-button {
+  background: #4f46e5;
+  color: white;
+}
+
+.retry-button:hover {
+  background: #4338ca;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+}
+
+.support-button {
+  background: #e2e8f0;
+  color: #2d3748;
+}
+
+.support-button:hover {
+  background: #cbd5e0;
+  transform: translateY(-2px);
+}
+
+.note {
+  color: #718096;
+  font-size: 14px;
+  line-height: 1.6;
+}

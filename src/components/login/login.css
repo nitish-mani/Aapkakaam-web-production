@@ -1,0 +1,50 @@
+.login {
+  width: 30rem;
+  background-color: var(--primary-color);
+  text-align: center;
+  box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.367);
+  margin: 1rem auto;
+}
+.login__1stChild {
+  color: #fff;
+  height: 10rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.login__2ndChild {
+  width: 100%;
+  background-color: #fff;
+  border-top-right-radius: 2rem;
+  border-top-left-radius: 2rem;
+  padding: 2rem;
+}
+.login__2ndChild div {
+  margin-bottom: 0.5rem;
+}
+.login__2ndChild div input {
+  height: 2.5rem;
+  padding: 2rem;
+  border: 1px solid #dee2e6;
+  border-radius: 1rem;
+  width: 100%;
+}
+.forgetPass {
+  width: fit-content;
+  color: rgba(0, 0, 255, 0.744);
+  margin: 0 auto;
+  cursor: pointer;
+}
+.forgetPass:hover {
+  color: blue;
+}
+@media screen and (max-width: 600px) {
+  .login {
+    margin-top: 5rem;
+  }
+}
+@media screen and (max-width: 350px) {
+  .login {
+    width: 27rem;
+  }
+}

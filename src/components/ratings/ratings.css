@@ -1,0 +1,86 @@
+.rating-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.6rem;
+  line-height: 1;
+  width: fit-content;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.rating svg {
+  width: 1.8rem;
+  height: 1.8rem;
+  flex-shrink: 0;
+}
+
+.rating.empty {
+  color: #d1d5db;
+}
+
+.rating.empty svg {
+  stroke: #d1d5db;
+  fill: none;
+}
+
+.rating.filled {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  overflow: hidden;
+  color: #fbbf24;
+  white-space: nowrap;
+}
+
+.rating.filled svg {
+  fill: #fbbf24;
+  stroke: #fbbf24;
+}
+
+/* Small size variant */
+.rating-small .rating svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.rating-small .rating-container {
+  font-size: 1.2rem;
+}
+
+/* Medium size variant (default) */
+.rating-medium .rating svg {
+  width: 1.8rem;
+  height: 1.8rem;
+}
+
+.rating-medium .rating-container {
+  font-size: 1.6rem;
+}
+
+/* Large size variant */
+.rating-large .rating svg {
+  width: 2.4rem;
+  height: 2.4rem;
+}
+
+.rating-large .rating-container {
+  font-size: 2rem;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .rating svg {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+
+  .rating-container {
+    font-size: 1.3rem;
+  }
+}
