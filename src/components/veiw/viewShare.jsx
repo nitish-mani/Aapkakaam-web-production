@@ -1,9 +1,11 @@
-import "./view.css";
+// Modern View Share Page - AapkaKaam
+
+import "./viewShare.css";
 
 import cross from "../../resources/svg/multiply-svgrepo-com.svg";
 import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { SERVER_URL } from "../../utils/base";
 import Attendance from "../Attendance/attendance";
@@ -15,6 +17,10 @@ export default function ViewShare() {
   const category = localStorage.getItem("category");
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const containerRef = useRef(null);
+
+  // Get language from Redux store
+  const lang = useSelector((store) => store.category?.selectLanguage || "en");
 
   const userData =
     category === "user"
@@ -35,16 +41,26 @@ export default function ViewShare() {
   const [err, setErr] = useState("");
   const [isFetched, setIsFetched] = useState(false);
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "instant",
+    });
+
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
+    }
+  }, []);
+
   useEffect(() => {
     if (!navigator.onLine) {
       setIsLoading(false);
-      setErr("You are offline");
-      setTimeout(() => {
-        setErr("");
-      }, 3000);
+      setErr(lang === "hin" ? "आप ऑफलाइन हैं" : "You are offline");
+      setTimeout(() => setErr(""), 3000);
       return;
     }
-    if (isFetched)
+    if (isFetched) {
       if (category === "user") {
         axios
           .get(`${SERVER_URL}/${category}/getShare/${userId}/${pageNo}`, {
@@ -58,11 +74,12 @@ export default function ViewShare() {
             setIsLoading(false);
           })
           .catch((err) => {
-            showError(err.response.data.message);
+            showError(
+              err.response?.data?.message ||
+                (lang === "hin" ? "शेयर डेटा लोड करने में विफल" : "Failed to load share data"),
+            );
             setIsLoading(false);
-            setTimeout(() => {
-              setErr("");
-            }, 3000);
+            setTimeout(() => setErr(""), 3000);
           });
       } else if (category === "vendor") {
         axios
@@ -77,18 +94,19 @@ export default function ViewShare() {
             setIsLoading(false);
           })
           .catch((err) => {
-            showError(err.response.data.message);
+            showError(
+              err.response?.data?.message ||
+                (lang === "hin" ? "शेयर डेटा लोड करने में विफल" : "Failed to load share data"),
+            );
             setIsLoading(false);
-            setTimeout(() => {
-              setErr("");
-            }, 3000);
+            setTimeout(() => setErr(""), 3000);
           });
       }
-  }, [pageNo, isFetched]);
+    }
+  }, [pageNo, isFetched, lang]);
 
-  function hanldeCrossInShare() {
+  function handleCrossInShare() {
     navigate("/");
-    JSON.parse(localStorage.getItem(category));
   }
 
   function handlePrev() {
@@ -107,128 +125,156 @@ export default function ViewShare() {
     }
   }
 
+  const formatDate = (date) => {
+    return new Date(date).toLocaleString(lang === "hin" ? "hi-IN" : "en-IN", {
+      timeZone: "Asia/Kolkata",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
     <>
-      {" "}
       <AdsterraBanner_320x50 />
-      <div className="views-P">
-        <img
-          className="profile__close-button"
-          src={cross}
-          alt="cross"
-          onClick={hanldeCrossInShare}
-        />
-        <h1
-          style={{
-            gridColumnEnd: "4",
-            gridColumnStart: "1",
-            marginBottom: "2rem",
-            paddingBottom: "1.5rem",
-            borderBottom: "1px solid rgba(105, 102, 102, 0.637)",
-          }}
-        >
-          Share <span style={{ fontSize: "1.5rem" }}>(Total Share = {totalShare} )</span>
-        </h1>
+      <div className="share-modern" ref={containerRef}>
+        <div className="share-container-modern">
+          {/* Close Button */}
+          <button className="share-close-btn" onClick={handleCrossInShare}>
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M18 6L6 18M6 6l12 12"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
 
-        {isFetched ? (
-          <div className="views">
-            {isLoading ? (
-              <div
-                style={{
-                  width: "100vw",
-                  height: "40rem",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {" "}
-                <div className="loading" style={{ width: "3rem", height: "3rem" }}></div>
+          {/* Header */}
+          <div className="share-header-modern">
+            <div className="share-header-left">
+              <div className="header-icon-wrapper">
+                <span className="header-icon">📤</span>
               </div>
-            ) : share.length === 0 ? (
-              <h1
-                style={{
-                  width: "80vw",
-                  height: "40rem",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                You haven't shared to Anyone
-              </h1>
-            ) : (
-              share.map((element) => {
-                return (
-                  <div className="views-children" key={element.phoneNo}>
-                    <div>
-                      <span>Phone No :</span> <span>{element.phoneNo}</span>
-                    </div>
+              <div>
+                <h1>{lang === "hin" ? "मेरे शेयर" : "My Shares"}</h1>
+                <p>
+                  {lang === "hin"
+                    ? "अपने सभी शेयर देखें और प्रबंधित करें"
+                    : "View and manage all your shares"}
+                </p>
+              </div>
+            </div>
+            <span className="share-total">
+              {lang === "hin" ? "कुल शेयर" : "Total Shares"}: {totalShare}
+            </span>
+          </div>
 
-                    <div>
-                      <span>Date :</span>
-                      <span>
-                        {new Date(element.shareDate).toLocaleString("en-IN", {
-                          timeZone: "Asia/Kolkata",
-                        })}
+          {/* Content */}
+          {!isFetched ? (
+            <div className="share-fetch-container">
+              <div className="share-fetch-icon">📊</div>
+              <h3>{lang === "hin" ? "शेयर डेटा देखें" : "View Share Data"}</h3>
+              <p>
+                {lang === "hin"
+                  ? "अपने शेयर डेटा देखने के लिए नीचे दिए गए बटन पर क्लिक करें"
+                  : "Click the button below to view your share data"}
+              </p>
+              <button className="fetch-btn-modern" onClick={() => setIsFetched(true)}>
+                <span className="fetch-icon">📤</span>
+                {lang === "hin" ? "शेयर डेटा लोड करें" : "Load Share Data"}
+              </button>
+            </div>
+          ) : isLoading ? (
+            <div className="share-loading-modern">
+              <div className="loading-spinner-modern"></div>
+              <p>{lang === "hin" ? "शेयर डेटा लोड हो रहा है..." : "Loading share data..."}</p>
+            </div>
+          ) : share.length === 0 ? (
+            <div className="share-empty-modern">
+              <span className="empty-icon">📭</span>
+              <h3>{lang === "hin" ? "कोई शेयर नहीं" : "No shares found"}</h3>
+              <p>
+                {lang === "hin"
+                  ? "आपने अभी तक किसी को शेयर नहीं किया है"
+                  : "You haven't shared with anyone yet"}
+              </p>
+            </div>
+          ) : (
+            <div className="share-list-modern">
+              {share.map((element, index) => (
+                <div className="share-card-modern" key={element.phoneNo || index}>
+                  <div className="share-card-icon">📱</div>
+                  <div className="share-card-content">
+                    <div className="share-field">
+                      <span className="share-label">
+                        {lang === "hin" ? "फोन नंबर" : "Phone Number"}:
                       </span>
+                      <span className="share-value">{element.phoneNo}</span>
+                    </div>
+                    <div className="share-field">
+                      <span className="share-label">
+                        {lang === "hin" ? "शेयर की तारीख" : "Share Date"}:
+                      </span>
+                      <span className="share-value">{formatDate(element.shareDate)}</span>
                     </div>
                   </div>
-                );
-              })
-            )}
-          </div>
-        ) : (
-          <button
-            className="btn"
-            style={{
-              width: "15rem",
-            }}
-            onClick={() => setIsFetched(true)}
-          >
-            Fetch Share Data
-          </button>
-        )}
-        <AdsterraBanner />
-        <div className="pageHandler">
-          <div
-            className="verify-btn"
-            style={{
-              width: "fit-content",
-              opacity: pageNo > 1 ? "1" : ".5",
-              cursor: pageNo > 1 ? "pointer" : "not-allowed",
-            }}
-            onClick={handlePrev}
-          >
-            Prev
-          </div>
-          <div
-            style={{
-              width: "2rem",
-              backgroundColor: "blue",
-              textAlign: "center",
-              color: "#fff",
-              padding: ".2rem",
-              borderRadius: "5px",
-            }}
-          >
-            {pageNo}
-          </div>
-          <div
-            className="verify-btn"
-            style={{
-              width: "fit-content",
-              opacity: totalPage > pageNo && pageNo > 1 ? "1" : ".5",
-              cursor: totalPage > pageNo && pageNo > 1 ? "pointer" : "not-allowed",
-            }}
-            onClick={handleNext}
-          >
-            Next
-          </div>
-        </div>
+                  <div className="share-card-badge">✓</div>
+                </div>
+              ))}
+            </div>
+          )}
 
-        {/* <Attendance pageNo={3} /> */}
+          {/* Pagination */}
+          {isFetched && share.length > 0 && (
+            <div className="share-pagination-modern">
+              <button
+                className={`pagination-btn ${pageNo <= 1 ? "disabled" : ""}`}
+                onClick={handlePrev}
+                disabled={pageNo <= 1}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+                {lang === "hin" ? "पिछला" : "Prev"}
+              </button>
+
+              <span className="pagination-page">
+                {pageNo} / {totalPage}
+              </span>
+
+              <button
+                className={`pagination-btn ${pageNo >= totalPage ? "disabled" : ""}`}
+                onClick={handleNext}
+                disabled={pageNo >= totalPage}
+              >
+                {lang === "hin" ? "अगला" : "Next"}
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
+      <AdsterraBanner />
     </>
   );
 }

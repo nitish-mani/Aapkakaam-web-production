@@ -28,6 +28,7 @@ import AttendanceReport from "./components/Attendance/attendanceReport";
 import TransactionStats from "./payments/TransactionStats";
 import LeaveManagement from "./components/Leave Management/leaveManagement";
 import Concern from "./components/Concern";
+import Profile from "./components/profile/profile";
 
 export default function App() {
   const router = createBrowserRouter([
@@ -55,7 +56,10 @@ export default function App() {
           path: "/",
           element: <Body />,
         },
-
+        {
+          path: "/profile",
+          element: <Profile />,
+        },
         {
           path: "/category",
           element: <Category />,
@@ -133,14 +137,13 @@ export default function App() {
           path: "/concern",
           element: <Concern />,
         },
+        { path: "/paymentSuccessful", element: <PaymentSuccess /> },
+        { path: "/paymentFailed", element: <PaymentFailed /> },
+        {
+          path: "/transactionHistory",
+          element: <TransactionStats />,
+        },
       ],
-    },
-
-    { path: "/paymentSuccessful", element: <PaymentSuccess /> },
-    { path: "/paymentFailed", element: <PaymentFailed /> },
-    {
-      path: "/transactionHistory",
-      element: <TransactionStats />,
     },
   ]);
   return (

@@ -10,133 +10,108 @@ import twitter from "../../resources/img/x.jpg";
 import { Link } from "react-router-dom";
 
 export default function Footer() {
-  // Add your WhatsApp group link here
-  const whatsappGroupLink =
-    "https://whatsapp.com/channel/0029VaiZeaiCHDyo3UOCvV1v";
+  const whatsappGroupLink = "https://whatsapp.com/channel/0029VaiZeaiCHDyo3UOCvV1v";
 
   const handleWhatsAppClick = () => {
-    // Open WhatsApp group link in new tab
     window.open(whatsappGroupLink, "_blank", "noopener,noreferrer");
   };
 
+  const socialLinks = [
+    {
+      icon: facebook,
+      label: "Facebook",
+      url: "https://www.facebook.com/groups/807413335463061/?ref=share&mibextid=NSMWBT",
+    },
+    { icon: youtube, label: "YouTube", url: "https://youtube.com/@aapkakaam?si=WSUqqsDsOGhaanN1" },
+    {
+      icon: insta,
+      label: "Instagram",
+      url: "https://www.instagram.com/aapkakaam?igsh=MTNvbDd2dm1kMnI0eg==",
+    },
+    { icon: linkedin, label: "LinkedIn", url: "https://www.linkedin.com/groups/16537011" },
+  ];
+
   return (
-    <div className="footer-div">
-      <div className="footer-div1st">
-        {" "}
-        <div>
-          <div className="title">ABOUT AAPKAKAAM</div>
-          <div className="title_child">
-            <div>
+    <footer className="modern-footer">
+      <div className="footer-grid">
+        {/* About Section */}
+        <div className="footer-column">
+          <h4 className="footer-title">ABOUT AAPKAKAAM</h4>
+          <ul className="footer-links">
+            <li>
               <Link to="/aboutUs">About Us</Link>
-            </div>
-            <div>
-              {" "}
-              <Link to="/privacy-policy">Privacy Policy</Link> |{" "}
-            </div>
-            <div>
-              {" "}
+            </li>
+            <li>
+              <Link to="/privacy-policy">Privacy Policy</Link>
+            </li>
+            <li>
               <Link to="/terms">Terms & Conditions</Link>
-            </div>
-            <div>FAQs</div>
-          </div>
+            </li>
+            <li>
+              <span>FAQs</span>
+            </li>
+          </ul>
         </div>
-        <div>
-          <div className="title">CONNECT WITH US</div>
-          <div className="title_child">
-            <div>Feedback</div>
-            <div>
+
+        {/* Connect Section */}
+        <div className="footer-column">
+          <h4 className="footer-title">CONNECT WITH US</h4>
+          <ul className="footer-links">
+            <li>
+              <span>Feedback</span>
+            </li>
+            <li>
               <Link to="/contactUs">Contact Us</Link>
-            </div>
-            <div>Advertise with Us</div>
-          </div>
+            </li>
+            <li>
+              <span>Advertise with Us</span>
+            </li>
+          </ul>
         </div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <div className="title">EXPERIENCE AAPKAKAAM APP</div>
-          <div style={{ display: "flex", flexDirection: "row", gap: "1rem" }}>
-            <div style={{ cursor: "pointer" }}>
-              <img src={appStore} alt="logo" style={{ width: "50px" }} />
-            </div>
-            <div style={{ cursor: "pointer" }}>
-              <img src={playStore} alt="logo" style={{ width: "50px" }} />
-            </div>
+
+        {/* App Section */}
+        <div className="footer-column">
+          <h4 className="footer-title">EXPERIENCE APP</h4>
+          <div className="app-badges">
+            <a href="#" className="app-badge">
+              <img src={appStore} alt="App Store" />
+            </a>
+            <a href="#" className="app-badge">
+              <img src={playStore} alt="Play Store" />
+            </a>
           </div>
         </div>
       </div>
-      <div
-        style={{ borderTop: "1px solid rgba(0, 0, 0, 0.12)", width: "100vw" }}
-      >
-        <div className="footer-div2nd">
-          <div className="copyRight">
+
+      {/* Bottom Bar */}
+      <div className="footer-bottom">
+        <div className="footer-bottom-inner">
+          <div className="footer-copy">
             © {new Date().getFullYear()} Uslugi Technology Pvt. Ltd.
           </div>
-          <div></div>
-          <div className="connect">
-            <div
-              className="title"
-              style={{ color: "#24272c", fontSize: "1.5rem" }}
-            >
-              Connect :
-            </div>
-            <img
-              src={facebook}
-              alt="facebook"
-              style={{ width: "2rem", height: "2rem", cursor: "pointer" }}
-              onClick={() =>
-                window.open(
-                  "https://www.facebook.com/groups/807413335463061/?ref=share&mibextid=NSMWBT",
-                  "_blank"
-                )
-              }
-            />
 
-            <img
-              src={youtube}
-              alt="youtube"
-              style={{ width: "2rem", height: "2rem", cursor: "pointer" }}
-              onClick={() =>
-                window.open(
-                  "https://youtube.com/@aapkakaam?si=WSUqqsDsOGhaanN1",
-                  "_blank"
-                )
-              }
-            />
-            <img
-              src={insta}
-              alt="insta"
-              style={{ width: "2rem", height: "2rem", cursor: "pointer" }}
-              onClick={() =>
-                window.open(
-                  "https://www.instagram.com/aapkakaam?igsh=MTNvbDd2dm1kMnI0eg==",
-                  "_blank"
-                )
-              }
-            />
-            <img
-              src={linkedin}
-              alt="linkedin"
-              style={{ width: "2rem", height: "2rem", cursor: "pointer" }}
-              onClick={() =>
-                window.open(
-                  "https://www.linkedin.com/groups/16537011",
-                  "_blank"
-                )
-              }
-            />
-            <img
-              src={whatsapp}
-              alt="whatsapp"
-              style={{ width: "2rem", height: "2rem", cursor: "pointer" }}
+          <div className="footer-social">
+            <span className="social-label">Connect :</span>
+            {socialLinks.map((social, index) => (
+              <button
+                key={index}
+                className="social-btn"
+                onClick={() => window.open(social.url, "_blank")}
+                aria-label={social.label}
+              >
+                <img src={social.icon} alt={social.label} />
+              </button>
+            ))}
+            <button
+              className="social-btn whatsapp"
               onClick={handleWhatsAppClick}
-            />
+              aria-label="WhatsApp"
+            >
+              <img src={whatsapp} alt="WhatsApp" />
+            </button>
           </div>
         </div>
       </div>
-    </div>
+    </footer>
   );
 }

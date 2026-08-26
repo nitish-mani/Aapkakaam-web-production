@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+// Modern Add Money Page - AapkaKaam (with scroll to top)
+
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "./DiscountedCard.css";
 import { addDataUser } from "../utils/userslice";
@@ -24,6 +26,11 @@ const DiscountCard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const category = localStorage.getItem("category");
+  const containerRef = useRef(null);
+
+  // Get language from Redux store
+  const lang = useSelector((store) => store.category?.selectLanguage || "en");
+
   const userData = useSelector((state) =>
     category === "user" ? state.user.data : state.vendor.data,
   );
@@ -42,18 +49,33 @@ const DiscountCard = () => {
   const [currentOrderId, setCurrentOrderId] = useState(null);
   const [currentAmount, setCurrentAmount] = useState(null);
 
+  // Scroll to top on mount
+  useEffect(() => {
+    // Scroll window to top
+    window.scrollTo({
+      top: 0,
+      behavior: "instant",
+    });
+
+    // Also scroll the container to top if it exists
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
+    }
+  }, []);
+
   // ============ RAZORPAY CLOSE HANDLER ============
   const handleRazorpayClose = async (razorpayInstance, orderId, amount) => {
     console.log("Razorpay modal closed by user", { orderId, amount });
 
-    // showWarning user-friendly message
-    showWarning("Payment was cancelled. You can try again anytime.");
+    showWarning(
+      lang === "hin"
+        ? "भुगतान रद्द कर दिया गया। आप कभी भी पुनः प्रयास कर सकते हैं।"
+        : "Payment was cancelled. You can try again anytime.",
+    );
 
-    // Reset loading states
     setLoadingIndex(null);
     setIsLoading(false);
 
-    // Send notification to backend about abandoned payment
     try {
       await axios.post(
         `${SERVER_URL}/payment/abandoned-payment`,
@@ -77,7 +99,6 @@ const DiscountCard = () => {
       console.error("Failed to log abandoned payment:", err);
     }
 
-    // Clean up Razorpay instance
     if (razorpayInstance) {
       try {
         razorpayInstance.close();
@@ -91,12 +112,11 @@ const DiscountCard = () => {
   const handlePaymentFailure = async (error, orderId, amount) => {
     console.error("Payment failed:", error);
 
-    // Reset loading states
     setLoadingIndex(null);
     setIsLoading(false);
 
-    // Extract error message
-    let errorMessage = "Payment failed. Please try again.";
+    let errorMessage =
+      lang === "hin" ? "भुगतान विफल। कृपया पुनः प्रयास करें।" : "Payment failed. Please try again.";
     let errorCode = "PAYMENT_FAILED";
     let errorDescription = "";
 
@@ -110,7 +130,6 @@ const DiscountCard = () => {
 
     setPaymentError(errorMessage);
 
-    // Log payment failure to backend
     try {
       await axios.post(
         `${SERVER_URL}/payment/payment-failed`,
@@ -139,8 +158,7 @@ const DiscountCard = () => {
       console.error("Failed to log payment failure:", err);
     }
 
-    // showWarning showWarning to user
-    showWarning(`Payment failed: ${errorMessage}`);
+    showWarning(errorMessage);
   };
 
   // ============ HANDLE PAY FUNCTION ============
@@ -150,7 +168,6 @@ const DiscountCard = () => {
     setCurrentAmount(amount);
 
     try {
-      // Create order
       const response = await axios.post(
         `${SERVER_URL}/payment/create-order`,
         {
@@ -178,7 +195,6 @@ const DiscountCard = () => {
       setIsLoading(true);
       setLoadingIndex(null);
 
-      // ============ RAZORPAY OPTIONS ============
       const options = {
         key: "rzp_test_THfazRmCIeemjt",
         amount: order.amount,
@@ -199,7 +215,6 @@ const DiscountCard = () => {
           discountPercent: discountPercent,
         },
 
-        // ============ HANDLER: SUCCESSFUL PAYMENT ============
         handler: async function (response) {
           console.log("Payment successful:", response);
 
@@ -230,12 +245,9 @@ const DiscountCard = () => {
             );
 
             const data = verifyResponse.data;
-            // console.log(data);
             if (data.success) {
               setLoadingIndex(null);
-              // setIsLoading(false);
 
-              // Update user data in Redux and localStorage
               const updatedData = {
                 ...userData[0],
                 balance: data.balance || userData[0]?.balance + amount,
@@ -247,7 +259,6 @@ const DiscountCard = () => {
               dispatch(action(updatedData));
               localStorage.setItem(category, JSON.stringify(updatedData));
 
-              // Redirect to success page
               window.location.href = `/paymentSuccessful?razorpay_payment_id=${response.razorpay_payment_id}&razorpay_order_id=${response.razorpay_order_id}&amount=${data.transaction.finalAmount}`;
             } else {
               setIsLoading(false);
@@ -259,11 +270,14 @@ const DiscountCard = () => {
             console.error("Verification error:", err);
             setIsLoading(false);
             setLoadingIndex(null);
-            showWarning("Something went wrong during verification. Please contact support.");
+            showWarning(
+              lang === "hin"
+                ? "सत्यापन के दौरान कुछ गलत हो गया। कृपया सहायता से संपर्क करें।"
+                : "Something went wrong during verification. Please contact support.",
+            );
           }
         },
 
-        // ============ MODAL CLOSE HANDLER ============
         modal: {
           ondismiss: function () {
             console.log("Modal dismissed by user");
@@ -273,43 +287,32 @@ const DiscountCard = () => {
           animation: true,
         },
 
-        // ============ THEME ============
         theme: {
           color: "#4f46e5",
         },
       };
 
-      // Create Razorpay instance
       const rzp = new window.Razorpay(options);
 
-      // ============ RAZORPAY EVENT LISTENERS ============
-
-      // 1. Payment failure event
       rzp.on("payment.failed", function (response) {
         console.error("Payment failed event:", response);
         handlePaymentFailure(response.error, order.id, amount);
       });
 
-      // 2. Payment success event (extra safety)
       rzp.on("payment.success", function (response) {
         console.log("Payment success event triggered:", response);
-        // The handler will handle this
       });
 
-      // 3. Razorpay loaded event
       rzp.on("loaded", function () {
         console.log("Razorpay modal loaded successfully");
       });
 
-      // 4. Checkout close event (fallback)
       let isClosedHandled = false;
       rzp.on("checkout.close", function () {
         if (!isClosedHandled) {
           isClosedHandled = true;
           console.log("Checkout closed event");
 
-          // Check if payment was completed by checking if we have a payment ID
-          // If not completed, handle as abandoned
           setTimeout(() => {
             if (!rzp._paymentCompleted) {
               handleRazorpayClose(rzp, order.id, amount);
@@ -319,7 +322,6 @@ const DiscountCard = () => {
         }
       });
 
-      // Open Razorpay modal
       rzp.open();
     } catch (err) {
       console.error("Payment initiation error:", err);
@@ -330,14 +332,15 @@ const DiscountCard = () => {
         err.response?.data?.message ||
           err.data?.message ||
           err.message ||
-          "Something went wrong. Please try again.",
+          (lang === "hin"
+            ? "कुछ गलत हो गया। कृपया पुनः प्रयास करें।"
+            : "Something went wrong. Please try again."),
       );
     }
   };
 
   // ============ HANDLE CROSS BUTTON ============
   function handleCrossInOrders() {
-    // Close Razorpay modal if open
     if (window.Razorpay && window._rzp) {
       try {
         window._rzp.close();
@@ -347,13 +350,14 @@ const DiscountCard = () => {
     }
     navigate("/");
   }
+
   function handleTransactionHistory() {
     navigate("/transactionHistory");
   }
+
   // ============ CLEANUP ON UNMOUNT ============
   useEffect(() => {
     return () => {
-      // Close Razorpay modal if component unmounts
       if (window.Razorpay && window._rzp) {
         try {
           window._rzp.close();
@@ -365,109 +369,121 @@ const DiscountCard = () => {
   }, []);
 
   return (
-    <div className="views-P">
-      <img
-        className="profile__close-button"
-        src={cross}
-        alt="cross"
-        onClick={handleCrossInOrders}
-        style={{ cursor: "pointer" }}
-      />
+    <div className="add-money-modern">
+      <div className="add-money-container" ref={containerRef}>
+        {/* Decorative Elements */}
+        <div className="add-money-decoration">
+          <div className="deco-circle c1"></div>
+          <div className="deco-circle c2"></div>
+          <div className="deco-circle c3"></div>
+        </div>
 
-      <div
-        style={{
-          gridColumnEnd: "4",
-          gridColumnStart: "1",
-          marginBottom: "2rem",
-          paddingBottom: "1.5rem",
-          borderBottom: "1px solid rgba(105, 102, 102, 0.637)",
-        }}
-      >
-        <h2>Add Balance</h2>
-        <p style={{ fontSize: "14px", color: "#93a0f3" }}>
-          Current Balance: ₹{user?.balance.toFixed(2) || 0}
-        </p>
-        <button
-          className="pay-button"
-          style={{
-            fontSize: "14px",
-            width: "fit-content",
-            padding: "0.5rem 1rem",
-            marginTop: "0.5rem",
-          }}
-          onClick={handleTransactionHistory}
-        >
-          Transaction History
+        {/* Close Button */}
+        <button className="add-money-close-btn" onClick={handleCrossInOrders}>
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M18 6L6 18M6 6l12 12"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
+          </svg>
         </button>
-      </div>
 
-      {isLoading ? (
-        <div
-          style={{
-            width: "100vw",
-            height: "40rem",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-            }}
-          >
-            <div className="loading"></div>
-            <p>Preparing payment...</p>
+        {/* Header */}
+        <div className="add-money-header">
+          <div className="add-money-badge">{lang === "hin" ? "💰 बैलेंस" : "💰 BALANCE"}</div>
+          <h1>{lang === "hin" ? "बैलेंस जोड़ें" : "Add Balance"}</h1>
+          <div className="add-money-balance">
+            <span>{lang === "hin" ? "वर्तमान बैलेंस" : "Current Balance"}</span>
+            <span className="balance-amount">₹{user?.balance?.toFixed(2) || 0}</span>
           </div>
+          <button className="add-money-history-btn" onClick={handleTransactionHistory}>
+            {lang === "hin" ? "📜 लेनदेन इतिहास" : "📜 Transaction History"}
+          </button>
+          <button className="add-money-history-btn" onClick={() => navigate("/paymentFailed")}>
+            failed
+          </button>
         </div>
-      ) : (
-        <div className="pricing-container">
-          {pricingOptions.map((amount, index) => {
-            const userAmount = {
-              discounted: amount.discounted / 10,
-              original: amount.original / 10,
-            };
-            const option = category === "user" ? userAmount : amount;
-            const discountPercent = Math.round(
-              ((option.original - option.discounted) / option.original) * 100,
-            );
 
-            return (
-              <div className="card animate-fadeInUp" key={index}>
-                <div className="card-header">
-                  {discountPercent === 0 ? (
-                    <span className="discount-badge">{discountPercent}%</span>
-                  ) : (
-                    <span className="discount-badge">-{discountPercent}%</span>
-                  )}
-                  <h3>₹{option.discounted}</h3>
+        {/* Loading State */}
+        {isLoading ? (
+          <div className="add-money-loading">
+            <div className="loader"></div>
+            <p>{lang === "hin" ? "भुगतान की तैयारी हो रही है..." : "Preparing payment..."}</p>
+          </div>
+        ) : (
+          /* Pricing Grid */
+          <div className="add-money-grid">
+            {pricingOptions.map((amount, index) => {
+              const userAmount = {
+                discounted: amount.discounted / 10,
+                original: amount.original / 10,
+              };
+              const option = category === "user" ? userAmount : amount;
+              const discountPercent = Math.round(
+                ((option.original - option.discounted) / option.original) * 100,
+              );
+
+              return (
+                <div className="add-money-card" key={index}>
+                  <div className="card-header">
+                    <div className="card-amount">₹{option.discounted}</div>
+                    {discountPercent > 0 && (
+                      <span className="card-discount-badge">-{discountPercent}%</span>
+                    )}
+                  </div>
+                  <div className="card-body">
+                    <div className="card-original-price">
+                      <span className="original-label">
+                        {lang === "hin" ? "मूल कीमत" : "Original"}
+                      </span>
+                      <span
+                        className="original-value"
+                        style={{
+                          textDecoration: discountPercent > 0 ? "line-through" : "none",
+                          opacity: discountPercent > 0 ? 0.6 : 1,
+                        }}
+                      >
+                        ₹{option.original}
+                      </span>
+                    </div>
+                    <div className="card-savings">
+                      <span className="savings-label">
+                        {lang === "hin" ? "आप बचाते हैं" : "You Save"}
+                      </span>
+                      <span className="savings-value">₹{option.original - option.discounted}</span>
+                    </div>
+                  </div>
+                  <button
+                    className="card-pay-btn"
+                    onClick={() => handlePay(option.original, discountPercent, index)}
+                    disabled={loadingIndex === index}
+                  >
+                    {loadingIndex === index ? (
+                      <span className="loader-small"></span>
+                    ) : (
+                      <>
+                        {lang === "hin" ? "भुगतान करें" : "Pay Now"}
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                      </>
+                    )}
+                  </button>
                 </div>
-                <p
-                  className="original-price"
-                  style={{
-                    textDecorationLine: discountPercent === 0 ? "none" : "line-through",
-                  }}
-                >
-                  ₹{option.original}
-                </p>
-                <p className="discount">You Save ₹{option.original - option.discounted}</p>
-                <button
-                  className="pay-button"
-                  onClick={() => handlePay(option.original, discountPercent, index)}
-                  disabled={loadingIndex === index}
-                  style={{
-                    opacity: loadingIndex === index ? 0.7 : 1,
-                    cursor: loadingIndex === index ? "not-allowed" : "pointer",
-                  }}
-                >
-                  {loadingIndex === index ? <div className="loading"></div> : "Pay Now"}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

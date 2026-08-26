@@ -1,3 +1,5 @@
+// Modern SignUp Page - AapkaKaam (with English & Hindi Job Types)
+
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router";
 import "./signup.css";
@@ -18,6 +20,9 @@ export default function SignUp() {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+
+  // Get language from Redux store
+  const lang = useSelector((store) => store.category?.selectLanguage || "en");
 
   // State management
   const [formData, setFormData] = useState({
@@ -112,13 +117,16 @@ export default function SignUp() {
   // API handlers
   const handlePhoneVerify = useCallback(async () => {
     if (!navigator.onLine) {
-      showMessage("err", "You are offline");
+      showMessage("err", lang === "hin" ? "आप ऑफलाइन हैं" : "You are offline");
       return;
     }
 
     if (!uiState.isOtpSent) {
       if (!/^\d{10}$/.test(formData.phoneNo)) {
-        showMessage("err", "Mobile Number must be 10 digits");
+        showMessage(
+          "err",
+          lang === "hin" ? "मोबाइल नंबर 10 अंकों का होना चाहिए" : "Mobile Number must be 10 digits",
+        );
         return;
       }
 
@@ -128,7 +136,6 @@ export default function SignUp() {
         const res = await axios.post(`${SERVER_URL}/${category}/phoneVerification`, {
           phoneNo: formData.phoneNo,
         });
-        console.log(res);
         if (res.data.verified) {
           setOtpId(res.data.otpId);
           dispatch(setValidPhoneNoId(res.data.otpId));
@@ -139,10 +146,14 @@ export default function SignUp() {
           }));
           showMessage("success", res.data.message, 2000);
         } else {
-          showMessage("err", error.message, 15000);
+          showMessage("err", res.data.message, 15000);
         }
       } catch (error) {
-        showMessage("err", error.response?.data?.message || "Phone verification failed");
+        showMessage(
+          "err",
+          error.response?.data?.message ||
+            (lang === "hin" ? "फोन वेरिफिकेशन विफल" : "Phone verification failed"),
+        );
       } finally {
         setUiState((prev) => ({ ...prev, isPhoneOtpLoading: false }));
       }
@@ -161,18 +172,38 @@ export default function SignUp() {
             isOtpSent: false,
             isPhoneOtpLoading: false,
           }));
-          showMessage("success", "OTP verified successfully", 2000);
+          showMessage(
+            "success",
+            lang === "hin" ? "OTP सफलतापूर्वक वेरिफाइड" : "OTP verified successfully",
+            2000,
+          );
         } else {
-          showMessage("err", res.data.message || "OTP verification failed");
+          showMessage(
+            "err",
+            res.data.message ||
+              (lang === "hin" ? "OTP वेरिफिकेशन विफल" : "OTP verification failed"),
+          );
         }
       } catch (error) {
-        console.log(error);
-        showMessage("err", error.response?.data?.message || "OTP verification failed");
+        showMessage(
+          "err",
+          error.response?.data?.message ||
+            (lang === "hin" ? "OTP वेरिफिकेशन विफल" : "OTP verification failed"),
+        );
       } finally {
         setUiState((prev) => ({ ...prev, isPhoneOtpLoading: false }));
       }
     }
-  }, [formData.phoneNo, formData.otp, otpId, category, dispatch, uiState.isOtpSent, showMessage]);
+  }, [
+    formData.phoneNo,
+    formData.otp,
+    otpId,
+    category,
+    dispatch,
+    uiState.isOtpSent,
+    showMessage,
+    lang,
+  ]);
 
   const handleSignup = useCallback(async () => {
     // Validation checks
@@ -192,16 +223,34 @@ export default function SignUp() {
       }));
       return;
     }
+    if (formData.pass !== formData.rePass) {
+      setValidation((prev) => ({ ...prev, isRePassMatch: false }));
+      return;
+    }
     if (!formData.gender) {
       setValidation((prev) => ({ ...prev, isGender: false }));
       return;
     }
     if (!navigator.onLine) {
-      showMessage("err", "You are offline");
+      showMessage("err", lang === "hin" ? "आप ऑफलाइन हैं" : "You are offline");
       return;
     }
     if (!agreed) {
-      showMessage("err", "You must accept the Terms & Conditions and Privacy Policy");
+      showMessage(
+        "err",
+        lang === "hin"
+          ? "आपको नियम एवं शर्तें और गोपनीयता नीति स्वीकार करनी होगी"
+          : "You must accept the Terms & Conditions and Privacy Policy",
+      );
+      return;
+    }
+    if (!uiState.verifyPhoneNo) {
+      showMessage(
+        "err",
+        lang === "hin"
+          ? "कृपया पहले अपना मोबाइल नंबर वेरिफाई करें"
+          : "Please verify your mobile number first",
+      );
       return;
     }
     setUiState((prev) => ({ ...prev, isLoading: true }));
@@ -225,11 +274,25 @@ export default function SignUp() {
         navigate("/login", { state: { category } });
       }, 2000);
     } catch (err) {
-      showMessage("err", err.response?.data?.message || "Signup failed");
+      showMessage(
+        "err",
+        err.response?.data?.message || (lang === "hin" ? "साइनअप विफल" : "Signup failed"),
+      );
     } finally {
       setUiState((prev) => ({ ...prev, isLoading: false }));
     }
-  }, [formData, category, id, cd, validPhoneNoId, navigate, showMessage]);
+  }, [
+    formData,
+    category,
+    id,
+    cd,
+    validPhoneNoId,
+    navigate,
+    showMessage,
+    lang,
+    agreed,
+    uiState.verifyPhoneNo,
+  ]);
 
   // Navigation handlers
   const handleLogin = useCallback(() => {
@@ -243,238 +306,314 @@ export default function SignUp() {
   // Early return if category is missing
   if (!category) {
     return (
-      <div className="signup">
-        <div className="err" style={{ opacity: 1, top: "-5rem" }}>
-          Invalid access. Please try again from proper navigation.
+      <div className="signup-modern">
+        <div className="signup-error">
+          {lang === "hin"
+            ? "अमान्य पहुँच। कृपया सही नेविगेशन से पुनः प्रयास करें।"
+            : "Invalid access. Please try again from proper navigation."}
         </div>
       </div>
     );
   }
+
   useEffect(() => {
-    if (showMessage) {
-      if (messages.err) {
-        showError(messages.err);
-      } else if (messages.success) {
-        showSuccess(messages.success);
-      }
+    if (messages.err) {
+      showError(messages.err);
+    } else if (messages.success) {
+      showSuccess(messages.success);
     }
-  }, [messages.err, messages.success, showMessage]);
+  }, [messages.err, messages.success]);
+
+  // Get all services with Hindi names from serviceData
+  const allServices = useMemo(() => {
+    return serviceData.flatMap((category) =>
+      category.services.map((service) => ({
+        value: service.jobType,
+        label: service.title,
+        labelHindi: service.hindi || service.title,
+        category: category.heading,
+        headingHindi: category.headingHindi || category.heading,
+      })),
+    );
+  }, []);
+
+  // Group services by category for better organization
+  const groupedServices = useMemo(() => {
+    const groups = {};
+    allServices.forEach((service) => {
+      const key = lang === "hin" ? service.headingHindi : service.category;
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(service);
+    });
+    return groups;
+  }, [allServices, lang]);
 
   return (
     <>
       <AdsterraBanner_320x50 />
-      <div className="signup">
-        {/* Messages */}
-
-        {/* Form Header */}
-        <div className="signup__1stChild">
-          <h3 style={{ color: "whitesmoke" }}>{profileCategory} Signup</h3>
-        </div>
-
-        {/* Form Body */}
-        <div className="signup__2ndChild">
-          {/* Name Input */}
-          <div>
-            <input
-              placeholder="Full Name"
-              type="text"
-              value={formData.name}
-              onChange={(e) => handleInputChange("name", e.target.value)}
-              style={{ border: validation.isNameEmpty ? "" : "2px solid red" }}
-            />
+      <div className="signup-modern">
+        <div className="signup-modern-container">
+          {/* Decorative Elements */}
+          <div className="signup-decoration">
+            <div className="deco-circle c1"></div>
+            <div className="deco-circle c2"></div>
+            <div className="deco-circle c3"></div>
           </div>
 
-          {/* Phone Verification */}
-          <div style={{ position: "relative" }}>
-            {uiState.isOtpSent ? (
-              <input
-                placeholder="Enter OTP"
-                type="number"
-                value={formData.otp}
-                onChange={(e) => handleInputChange("otp", e.target.value)}
-              />
-            ) : (
-              <input
-                placeholder="Phone No."
-                type="number"
-                value={formData.phoneNo}
-                readOnly={uiState.verifyPhoneNo}
-                onChange={(e) => handleInputChange("phoneNo", e.target.value)}
-                style={{
-                  marginBottom: validation.isNumValid ? "" : "0",
-                  border: validation.isNumValid ? "" : "2px solid red",
-                }}
-              />
-            )}
-
-            {uiState.verifyPhoneNo && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  right: "5px",
-                  transform: "translateY(-40%)",
-                }}
-              >
-                <img src={rightTck} alt="Verified" style={{ width: "2rem", height: "2rem" }} />
-              </div>
-            )}
-
-            {formData.phoneNo.length === 10 && !uiState.verifyPhoneNo && (
-              <div className="verify" onClick={handlePhoneVerify}>
-                {uiState.isOtpSent ? (
-                  uiState.isPhoneOtpLoading ? (
-                    <div className="loading"></div>
-                  ) : (
-                    "Verify OTP"
-                  )
-                ) : uiState.isPhoneOtpLoading ? (
-                  <div className="loading"></div>
-                ) : (
-                  "Verify Mobile Number"
-                )}
-              </div>
-            )}
-
-            <h6
-              style={{
-                display: validation.isNumValid ? "none" : "",
-                color: "red",
-                textAlign: "left",
-              }}
-            >
-              Incorrect Number
-            </h6>
+          {/* Header */}
+          <div className="signup-header">
+            <div className="signup-badge">{lang === "hin" ? "✨ नया खाता" : "✨ NEW ACCOUNT"}</div>
+            <h1>
+              {lang === "hin" ? "साइनअप करें" : "Signup as"}{" "}
+              <span className="highlight">{profileCategory}</span>
+            </h1>
+            <p>
+              {lang === "hin"
+                ? "अपना खाता बनाएं और सेवाएँ शुरू करें"
+                : "Create your account and get started"}
+            </p>
           </div>
 
-          {/* Password Input */}
-          <div className="password">
-            <input
-              placeholder="Password"
-              type={uiState.isEyeClicked ? "text" : "password"}
-              value={formData.pass}
-              onChange={(e) => handleInputChange("pass", e.target.value)}
-              style={{
-                marginBottom: validation.isPassValid ? "" : "0",
-                border: validation.isPassValid ? "" : "2px solid red",
-              }}
-            />
-
-            <div className="eyesvg" onClick={handleEyeClicked}>
-              <img src={eye} alt="Toggle password visibility" />
-            </div>
-            <div
-              className="cross-line"
-              style={{
-                display: uiState.isEyeClicked ? "block" : "none",
-                pointerEvents: "none",
-              }}
-            >
-              <img src={line} alt="" />
-            </div>
-          </div>
-
-          <h6
-            style={{
-              display: validation.isValidPass ? "none" : "",
-              color: "red",
-              textAlign: "left",
-              fontSize: "1rem",
-            }}
-          >
-            Password must be at least 6 characters long
-          </h6>
-
-          {/* Job Select (Vendor only) */}
-          {category === "vendor" && (
-            <>
-              <div>
-                <select
-                  className="job-select"
-                  value={formData.job || ""}
-                  onChange={(e) => handleInputChange("job", e.target.value)}
-                >
-                  <option value="">Select Job Type</option>
-
-                  {serviceData.flatMap((category) =>
-                    category.services.map((service) => (
-                      <option
-                        key={`${category.heading}-${service.jobType}`}
-                        value={service.jobType}
-                      >
-                        {service.title}
-                      </option>
-                    )),
-                  )}
-                </select>
-              </div>
-              <div>
+          {/* Form */}
+          <div className="signup-form">
+            {/* Name Input */}
+            <div className="form-group">
+              <label>{lang === "hin" ? "👤 पूरा नाम" : "👤 Full Name"}</label>
+              <div className="input-wrapper">
                 <input
-                  placeholder="How many years of experience do you have?"
-                  type="number"
-                  value={formData.experience}
-                  onChange={(e) => handleInputChange("experience", e.target.value)}
-                  style={{ border: validation.isNameEmpty ? "" : "2px solid red" }}
+                  type="text"
+                  placeholder={lang === "hin" ? "पूरा नाम दर्ज करें" : "Enter full name"}
+                  value={formData.name}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  // className={!validation.isNameEmpty ? "error" : ""}
                 />
               </div>
-            </>
-          )}
+            </div>
 
-          {/* Gender Select */}
-          <div>
-            <select
-              className="job-select"
-              value={formData.gender}
-              onChange={(e) => handleInputChange("gender", e.target.value)}
-              style={{
-                border: validation.isGender ? "" : "2px solid red",
-              }}
-            >
-              <option value="">Select Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div style={{ marginBottom: "12px" }}>
-            <label style={{ fontSize: "12px" }}>
-              <input
-                type="checkbox"
-                checked={agreed}
-                onChange={(e) => setAgreed(e.target.checked)}
-              />{" "}
-              I agree to the{" "}
-              <a href="https://aapkakaam.com/terms" target="_blank" rel="noopener noreferrer">
-                Terms & Conditions
-              </a>{" "}
-              and{" "}
-              <a
-                href="https://aapkakaam.com/privacy-policy"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Privacy Policy
-              </a>
-            </label>
-          </div>
+            {/* Phone Verification */}
+            <div className="form-group">
+              <label>{lang === "hin" ? "📱 मोबाइल नंबर" : "📱 Mobile Number"}</label>
+              <div className="input-wrapper phone-wrapper">
+                {uiState.isOtpSent ? (
+                  <input
+                    type="text"
+                    placeholder={lang === "hin" ? "OTP दर्ज करें" : "Enter OTP"}
+                    value={formData.otp}
+                    onChange={(e) => handleInputChange("otp", e.target.value)}
+                    className="otp-input"
+                  />
+                ) : (
+                  <input
+                    type="tel"
+                    placeholder={lang === "hin" ? "मोबाइल नंबर दर्ज करें" : "Enter mobile number"}
+                    value={formData.phoneNo}
+                    readOnly={uiState.verifyPhoneNo}
+                    onChange={(e) => handleInputChange("phoneNo", e.target.value)}
+                    className={!validation.isNumValid ? "error" : ""}
+                    maxLength="10"
+                  />
+                )}
 
-          {/* Submit Button */}
-          <button className="btn" onClick={handleSignup} disabled={uiState.isLoading}>
-            {uiState.isLoading ? <div className="loading"></div> : "Signup"}
-          </button>
+                {uiState.verifyPhoneNo && (
+                  <div className="verified-badge">
+                    <img src={rightTck} alt="Verified" />
+                  </div>
+                )}
 
-          {/* Login Link */}
-          <div>
-            <h5>
-              Already Have an Account?
-              <span
-                className="verify-btn forgetPass"
-                onClick={handleLogin}
-                style={{ border: "none" }}
-              >
-                Login
-              </span>
-            </h5>
+                {formData.phoneNo.length === 10 && !uiState.verifyPhoneNo && (
+                  <button
+                    className="verify-btn-modern"
+                    onClick={handlePhoneVerify}
+                    type="button"
+                    disabled={uiState.isPhoneOtpLoading}
+                  >
+                    {uiState.isPhoneOtpLoading ? (
+                      <span className="loader-small"></span>
+                    ) : uiState.isOtpSent ? (
+                      lang === "hin" ? (
+                        "OTP वेरिफाई करें"
+                      ) : (
+                        "Verify OTP"
+                      )
+                    ) : lang === "hin" ? (
+                      "वेरिफाई करें"
+                    ) : (
+                      "Verify"
+                    )}
+                  </button>
+                )}
+
+                {!validation.isNumValid && (
+                  <span className="input-error">
+                    ⚠️ {lang === "hin" ? "10 अंकों का नंबर दर्ज करें" : "Enter 10 digit number"}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Password Input */}
+            <div className="form-group">
+              <label>{lang === "hin" ? "🔒 पासवर्ड" : "🔒 Password"}</label>
+              <div className="input-wrapper password-wrapper">
+                <input
+                  type={uiState.isEyeClicked ? "text" : "password"}
+                  placeholder={lang === "hin" ? "पासवर्ड दर्ज करें" : "Enter password"}
+                  value={formData.pass}
+                  onChange={(e) => handleInputChange("pass", e.target.value)}
+                  className={!validation.isPassValid ? "error" : ""}
+                />
+                <button className="eye-toggle" onClick={handleEyeClicked} type="button">
+                  <img src={eye} alt="Toggle password" />
+                  {uiState.isEyeClicked && <img src={line} alt="" className="eye-line" />}
+                </button>
+                {!validation.isValidPass && (
+                  <span className="input-error">
+                    ⚠️{" "}
+                    {lang === "hin"
+                      ? "पासवर्ड कम से कम 6 अक्षर का होना चाहिए"
+                      : "Password must be at least 6 characters"}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Confirm Password */}
+            <div className="form-group">
+              <label>{lang === "hin" ? "🔐 पासवर्ड दोबारा" : "🔐 Confirm Password"}</label>
+              <div className="input-wrapper">
+                <input
+                  type={uiState.isEyeClicked ? "text" : "password"}
+                  placeholder={lang === "hin" ? "पासवर्ड दोबारा दर्ज करें" : "Re-enter password"}
+                  value={formData.rePass}
+                  onChange={(e) => handleInputChange("rePass", e.target.value)}
+                  className={!validation.isRePassMatch ? "error" : ""}
+                />
+                {!validation.isRePassMatch && (
+                  <span className="input-error">
+                    ⚠️ {lang === "hin" ? "पासवर्ड मैच नहीं हो रहा" : "Passwords do not match"}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Job Select (Vendor only) */}
+            {category === "vendor" && (
+              <>
+                <div className="form-group">
+                  <label>{lang === "hin" ? "💼 जॉब टाइप" : "💼 Job Type"}</label>
+                  <div className="input-wrapper">
+                    <select
+                      className="modern-select"
+                      value={formData.job || ""}
+                      onChange={(e) => handleInputChange("job", e.target.value)}
+                    >
+                      <option value="">
+                        {lang === "hin" ? "जॉब टाइप चुनें" : "Select Job Type"}
+                      </option>
+                      {Object.entries(groupedServices).map(([categoryName, services]) => (
+                        <optgroup key={categoryName} label={categoryName}>
+                          {services.map((service) => (
+                            <option key={service.value} value={service.value}>
+                              {lang === "hin" ? service.labelHindi : service.label}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>
+                    {lang === "hin" ? "📅 अनुभव (वर्षों में)" : "📅 Experience (in years)"}
+                  </label>
+                  <div className="input-wrapper">
+                    <input
+                      type="number"
+                      placeholder={lang === "hin" ? "अनुभव दर्ज करें" : "Enter experience"}
+                      value={formData.experience}
+                      onChange={(e) => handleInputChange("experience", e.target.value)}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Gender Select */}
+            <div className="form-group">
+              <label>{lang === "hin" ? "👤 लिंग" : "👤 Gender"}</label>
+              <div className="input-wrapper">
+                <select
+                  className={`modern-select `}
+                  value={formData.gender}
+                  onChange={(e) => handleInputChange("gender", e.target.value)}
+                >
+                  <option value="">{lang === "hin" ? "लिंग चुनें" : "Select Gender"}</option>
+                  <option value="male">{lang === "hin" ? "पुरुष" : "Male"}</option>
+                  <option value="female">{lang === "hin" ? "महिला" : "Female"}</option>
+                  <option value="other">{lang === "hin" ? "अन्य" : "Other"}</option>
+                </select>
+                {/* {!validation.isGender && (
+                  <span className="input-error">
+                    ⚠️ {lang === "hin" ? "लिंग चुनें" : "Please select gender"}
+                  </span>
+                )} */}
+              </div>
+            </div>
+
+            {/* Terms & Conditions */}
+            <div className="terms-group">
+              <label className="terms-label">
+                <input
+                  type="checkbox"
+                  checked={agreed}
+                  onChange={(e) => setAgreed(e.target.checked)}
+                />
+                <span>
+                  {lang === "hin" ? "मैं" : "I agree to the"}{" "}
+                  <a href="https://aapkakaam.com/terms" target="_blank" rel="noopener noreferrer">
+                    {lang === "hin" ? "नियम एवं शर्तें" : "Terms & Conditions"}
+                  </a>{" "}
+                  {lang === "hin" ? "और" : "and"}{" "}
+                  <a
+                    href="https://aapkakaam.com/privacy-policy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {lang === "hin" ? "गोपनीयता नीति" : "Privacy Policy"}
+                  </a>
+                </span>
+              </label>
+            </div>
+
+            {/* Submit Button */}
+            <button className="signup-btn" onClick={handleSignup} disabled={uiState.isLoading}>
+              {uiState.isLoading ? (
+                <span className="loader"></span>
+              ) : (
+                <span>
+                  {lang === "hin" ? "साइनअप करें" : "Signup"}
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </span>
+              )}
+            </button>
+
+            {/* Login Link */}
+            <div className="login-link">
+              <span>{lang === "hin" ? "पहले से खाता है?" : "Already have an account?"}</span>
+              <button onClick={handleLogin}>{lang === "hin" ? "लॉगिन करें" : "Login"} →</button>
+            </div>
           </div>
         </div>
       </div>

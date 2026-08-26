@@ -9,7 +9,7 @@ const categorySlice = createSlice({
     location_pincode: "",
     location_post: "",
     cancelOrder: false,
-    selectLanguage: "en",
+    selectLanguage: "hin",
     url: "",
     validEmailId: "",
     validPhoneNoId: "",

@@ -1,55 +1,321 @@
-.earnings-container {
+/* ============================================
+   MODERN EARNINGS PAGE - AapkaKaam
+   ============================================ */
+
+/* ===== RESET & BASE ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.earnings-modern {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+  padding-top: 20px;
+  background: #f0f4fe;
   min-height: 100vh;
-  padding: 3rem 2rem;
-  background: linear-gradient(135deg, #f9fafb 0%, #eef2f3 100%);
-  font-family: "Poppins", sans-serif;
+  font-family: "Inter", "Noto Sans Devanagari", system-ui, sans-serif;
+}
+
+/* ===== CONTAINER ===== */
+.earnings-modern-container {
   position: relative;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 28px 28px 32px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
 }
 
-.page-title {
-  text-align: center;
-  color: #1f2937;
-  font-size: 2.5rem;
-  font-weight: 600;
-  margin-bottom: 2rem;
-  border-bottom: 4px solid #d1d5db;
-  display: inline-block;
-  padding-bottom: 0.5rem;
-}
-
-.close-btn {
-  width: 2.2rem;
-  height: 2.2rem;
+/* ===== Close Button ===== */
+.earnings-close-btn {
   position: absolute;
-  right: 2rem;
-  top: 2rem;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  display: grid;
+  place-items: center;
+  transition: all 0.3s ease;
 }
 
-.close-btn:hover {
-  transform: scale(1.1);
+.earnings-close-btn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  transform: rotate(90deg);
 }
 
-.error-banner {
+.earnings-close-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ===== HEADER ===== */
+.earnings-header-modern {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 18px;
+  border-bottom: 2px solid #f1f5f9;
+  margin-bottom: 20px;
+}
+
+.earnings-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.header-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  font-size: 24px;
+}
+
+.earnings-header-left h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.earnings-header-left p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ===== LOADING ===== */
+.earnings-loading-modern {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 16px;
+}
+
+.loading-spinner-modern {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(37, 99, 235, 0.1);
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.earnings-loading-modern p {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== STATS GRID ===== */
+.earnings-grid-modern {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.earnings-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border-left: 4px solid;
+  transition: all 0.3s ease;
+}
+
+.earnings-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+.stat-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-value {
+  display: block;
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.stat-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+
+/* ===== WITHDRAW SECTION ===== */
+.earnings-withdraw-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  border-radius: 16px;
+  margin-bottom: 14px;
+}
+
+.withdraw-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.withdraw-icon {
+  font-size: 28px;
+}
+
+.withdraw-info strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.withdraw-info p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.withdraw-btn-modern {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.withdraw-btn-modern:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
+}
+
+.withdraw-btn-modern:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===== WITHDRAW STATUS ===== */
+.withdraw-status-modern {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.status-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.status-value {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.status-value.eligible {
+  color: #16a34a;
+}
+
+.status-value.not-eligible {
+  color: #dc2626;
+}
+
+/* ===== WITHDRAW MODAL ===== */
+.withdraw-modal-overlay {
   position: fixed;
-  top: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #ef4444;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  font-size: 1.5rem;
-  /* animation: fadeIn 0.3s ease; */
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.withdraw-modal {
+  background: #ffffff;
+  border-radius: 24px;
+  max-width: 440px;
+  width: 100%;
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -57,80 +323,412 @@
   }
 }
 
-.earnings-grid {
+.withdraw-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: #ffffff;
+}
+
+.withdraw-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.modal-close-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 2fr));
-  gap: 2rem;
-  justify-items: center;
+  place-items: center;
 }
 
-.earning-card {
-  background: white;
-  width: 100%;
-  max-width: 300px;
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  padding: 1.5rem;
-  text-align: center;
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
-.earning-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+.withdraw-modal-body {
+  padding: 24px;
 }
 
-.label {
-  color: #6b7280;
-  font-weight: 500;
-  font-size: 1.7rem;
+.withdraw-amount-display {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
 }
 
-.earning-card h2 {
-  font-size: 2.5rem;
+.withdraw-label {
+  font-size: 14px;
   font-weight: 600;
-  margin-top: 0.5rem;
+  color: #64748b;
 }
 
-/* Custom color themes for each card */
-.total-orders h2 {
-  color: #1e3a8a;
-}
-.new-orders h2 {
+.withdraw-amount {
+  font-size: 18px;
+  font-weight: 800;
   color: #2563eb;
 }
-.completed-orders h2 {
-  color: #16a34a;
-}
-.canceled-orders h2 {
-  color: #dc2626;
-}
-.average-earnings h2 {
-  color: #11c1b2;
-}
-.total-earnings h2 {
-  color: #0d9488;
+
+.withdraw-method-group,
+.withdraw-amount-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
 }
 
-.withdraw-btn {
-  grid-column: 1 / -1;
-  margin-top: 1.5rem;
-  background: linear-gradient(90deg, #2563eb, #1d4ed8);
-  color: white;
+.withdraw-method-group label,
+.withdraw-amount-group label {
+  font-size: 13px;
   font-weight: 600;
-  padding: 1rem 3rem;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 2.1rem;
-  transition:
-    background 0.3s ease,
-    transform 0.2s ease;
+  color: #475569;
 }
 
-.withdraw-btn:hover {
-  background: linear-gradient(90deg, #1d4ed8, #2563eb);
-  transform: translateY(-3px);
+.withdraw-select,
+.withdraw-input {
+  padding: 10px 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  background: #f8fafc;
+}
+
+.withdraw-select:focus,
+.withdraw-input:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+}
+
+.withdraw-input {
+  width: 100%;
+}
+
+.withdraw-amount-group small {
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: right;
+}
+
+.withdraw-modal-footer {
+  display: flex;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.cancel-btn,
+.confirm-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.cancel-btn {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.cancel-btn:hover {
+  background: #e2e8f0;
+}
+
+.confirm-btn {
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: #ffffff;
+}
+
+.confirm-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.2);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .earnings-modern {
+    padding: 12px 12px 30px;
+  }
+
+  .earnings-modern-container {
+    padding: 20px 16px 24px;
+    border-radius: 20px;
+  }
+
+  .earnings-grid-modern {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .earnings-stat-card {
+    padding: 14px 14px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+
+  .earnings-header-left h1 {
+    font-size: 19px;
+  }
+
+  .earnings-close-btn {
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .earnings-close-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .earnings-withdraw-section {
+    flex-direction: column;
+    text-align: center;
+    padding: 14px 16px;
+  }
+
+  .withdraw-info {
+    flex-direction: column;
+  }
+
+  .withdraw-btn-modern {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .withdraw-status-modern {
+    grid-template-columns: 1fr;
+  }
+
+  .withdraw-modal {
+    max-width: 100%;
+    margin: 10px;
+  }
+
+  .withdraw-modal-body {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .earnings-modern {
+    padding: 8px 8px 20px;
+  }
+
+  .earnings-modern-container {
+    padding: 16px 12px 18px;
+    border-radius: 16px;
+  }
+
+  .header-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .earnings-header-left h1 {
+    font-size: 17px;
+  }
+
+  .earnings-header-left p {
+    font-size: 12px;
+  }
+
+  .earnings-grid-modern {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .earnings-stat-card {
+    padding: 12px 12px;
+    gap: 10px;
+  }
+
+  .stat-icon {
+    font-size: 22px;
+  }
+
+  .stat-value {
+    font-size: 16px;
+  }
+
+  .stat-label {
+    font-size: 9px;
+  }
+
+  .withdraw-modal-footer {
+    flex-direction: column;
+  }
+
+  .cancel-btn,
+  .confirm-btn {
+    width: 100%;
+  }
+}
+
+/* ===== DARK MODE ===== */
+@media (prefers-color-scheme: dark) {
+  .earnings-modern {
+    background: #0f172a;
+  }
+
+  .earnings-modern-container {
+    background: #1e293b;
+    border-color: #334155;
+  }
+
+  .earnings-header-left h1 {
+    color: #f1f5f9;
+  }
+
+  .earnings-header-left p {
+    color: #94a3b8;
+  }
+
+  .header-icon-wrapper {
+    background: #1a3a2a;
+  }
+
+  .earnings-close-btn {
+    background: #334155;
+    color: #94a3b8;
+  }
+
+  .earnings-close-btn:hover {
+    background: #3a1a1a;
+    color: #f87171;
+  }
+
+  .earnings-stat-card {
+    background: #1e293b;
+    border-color: #334155;
+  }
+
+  .stat-value {
+    color: #f1f5f9;
+  }
+
+  .stat-label {
+    color: #64748b;
+  }
+
+  .earnings-withdraw-section {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+  }
+
+  .withdraw-info p {
+    color: #64748b;
+  }
+
+  .withdraw-btn-modern {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  }
+
+  .status-item {
+    background: #1e293b;
+    border-color: #334155;
+  }
+
+  .status-label {
+    color: #64748b;
+  }
+
+  .status-value.eligible {
+    color: #4ade80;
+  }
+
+  .status-value.not-eligible {
+    color: #f87171;
+  }
+
+  .withdraw-modal {
+    background: #1e293b;
+  }
+
+  .withdraw-modal-header {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+  }
+
+  .withdraw-amount-display {
+    background: #1e293b;
+    border-color: #334155;
+  }
+
+  .withdraw-label {
+    color: #94a3b8;
+  }
+
+  .withdraw-amount {
+    color: #60a5fa;
+  }
+
+  .withdraw-method-group label,
+  .withdraw-amount-group label {
+    color: #94a3b8;
+  }
+
+  .withdraw-select,
+  .withdraw-input {
+    background: #334155;
+    border-color: #475569;
+    color: #f1f5f9;
+  }
+
+  .withdraw-select:focus,
+  .withdraw-input:focus {
+    border-color: #3b82f6;
+    background: #1e293b;
+  }
+
+  .withdraw-modal-footer {
+    border-top-color: #334155;
+  }
+
+  .cancel-btn {
+    background: #334155;
+    color: #94a3b8;
+  }
+
+  .cancel-btn:hover {
+    background: #475569;
+  }
+
+  .confirm-btn {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  }
+
+  .loading-spinner-modern {
+    border-color: rgba(59, 130, 246, 0.1);
+    border-top-color: #3b82f6;
+  }
+
+  .earnings-loading-modern p {
+    color: #94a3b8;
+  }
 }
