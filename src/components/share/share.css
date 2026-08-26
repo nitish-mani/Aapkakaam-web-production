@@ -1,28 +1,512 @@
-.share {
-  margin: 5rem auto;
-  width: 25rem;
-  height: 40rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+/* ============================================
+   MODERN SHARE PAGE - AapkaKaam
+   ============================================ */
+
+/* ===== RESET & BASE ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-.share button {
+
+.share-modern-page {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+  padding-top: 20px;
+  background: #f0f4fe;
+  min-height: 100vh;
+  font-family: "Inter", "Noto Sans Devanagari", system-ui, sans-serif;
+}
+
+/* ===== CONTAINER ===== */
+.share-modern-container {
+  position: relative;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 32px 28px 36px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+}
+
+/* ===== Close Button ===== */
+.share-modern-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
   border: none;
-  background-color: #fff;
-  border: 1px solid blue;
-  border-radius: 5px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
   cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.3s ease;
 }
 
-.share button:hover {
-  box-shadow: 0 1px 4px blue;
+.share-modern-close:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  transform: rotate(90deg);
 }
 
-.share button img {
-  width: 5rem;
+.share-modern-close svg {
+  width: 18px;
+  height: 18px;
 }
-@media screen and (max-width: 600px) {
-  .share {
-    margin-top: 5rem;
+
+/* ===== HEADER ===== */
+.share-modern-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f1f5f9;
+  margin-bottom: 20px;
+}
+
+.share-header-icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.share-header-content h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.share-header-content p {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ===== URL DISPLAY ===== */
+.share-url-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 14px;
+}
+
+.share-url-display {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.url-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.url-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: "Inter", monospace;
+}
+
+.copy-btn {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.copy-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2);
+}
+
+.copy-success {
+  color: #86efac;
+}
+
+/* ===== SHARE TEXT ===== */
+.share-text-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fffbeb;
+  border-radius: 10px;
+  border: 1px solid #fde68a;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.share-text-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.share-text-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: #78350f;
+  font-style: italic;
+}
+
+/* ===== SOCIAL GRID ===== */
+.share-modern-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.share-modern-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 18px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  position: relative;
+  min-height: 110px;
+}
+
+.share-modern-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--hover-color, #2563eb);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+}
+
+.share-modern-card:hover .share-card-icon {
+  transform: scale(1.1);
+}
+
+.share-card-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  transition: transform 0.3s ease;
+}
+
+.share-card-icon img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.share-card-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.share-card-arrow {
+  font-size: 16px;
+  color: #94a3b8;
+  transition: all 0.3s ease;
+  opacity: 0;
+  position: absolute;
+  top: 8px;
+  right: 10px;
+}
+
+.share-modern-card:hover .share-card-arrow {
+  opacity: 1;
+  transform: translateX(4px);
+  color: var(--hover-color, #2563eb);
+}
+
+/* ===== FOOTER ===== */
+.share-modern-footer {
+  text-align: center;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.share-modern-footer span {
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .share-modern-page {
+    padding: 12px 12px 30px;
+  }
+
+  .share-modern-container {
+    padding: 24px 16px 28px;
+    border-radius: 20px;
+  }
+
+  .share-modern-header {
+    gap: 12px;
+  }
+
+  .share-header-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+
+  .share-header-content h1 {
+    font-size: 20px;
+  }
+
+  .share-header-content p {
+    font-size: 13px;
+  }
+
+  .share-modern-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .share-modern-card {
+    padding: 14px 8px;
+    min-height: 100px;
+  }
+
+  .share-card-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .share-card-icon img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .share-card-label {
+    font-size: 10px;
+  }
+
+  .share-url-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px 14px;
+  }
+
+  .url-text {
+    font-size: 11px;
+  }
+
+  .copy-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 8px;
+  }
+
+  .share-text-display {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 8px 12px;
+  }
+
+  .share-text-value {
+    font-size: 12px;
+  }
+
+  .share-modern-close {
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .share-modern-close svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .share-card-arrow {
+    display: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .share-modern-page {
+    padding: 8px 8px 20px;
+  }
+
+  .share-modern-container {
+    padding: 18px 12px 22px;
+    border-radius: 16px;
+  }
+
+  .share-header-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+  }
+
+  .share-header-content h1 {
+    font-size: 17px;
+  }
+
+  .share-header-content p {
+    font-size: 12px;
+  }
+
+  .share-modern-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .share-modern-card {
+    padding: 12px 8px;
+    min-height: 90px;
+  }
+
+  .share-card-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .share-card-icon img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .share-card-label {
+    font-size: 9px;
+  }
+
+  .url-text {
+    font-size: 10px;
+  }
+
+  .share-text-value {
+    font-size: 11px;
+  }
+
+  .share-modern-footer span {
+    font-size: 11px;
+  }
+}
+
+/* ===== DARK MODE ===== */
+@media (prefers-color-scheme: dark) {
+  .share-modern-page {
+    background: #0f172a;
+  }
+
+  .share-modern-container {
+    background: #1e293b;
+    border-color: #334155;
+  }
+
+  .share-header-icon {
+    background: #1a2a4a;
+  }
+
+  .share-header-content h1 {
+    color: #f1f5f9;
+  }
+
+  .share-header-content p {
+    color: #94a3b8;
+  }
+
+  .share-modern-close {
+    background: #334155;
+    color: #94a3b8;
+  }
+
+  .share-modern-close:hover {
+    background: #3a1a1a;
+    color: #f87171;
+  }
+
+  .share-url-container {
+    background: #1e293b;
+    border-color: #334155;
+  }
+
+  .url-text {
+    color: #94a3b8;
+  }
+
+  .copy-btn {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  }
+
+  .share-text-display {
+    background: #1a2a1a;
+    border-color: #166534;
+  }
+
+  .share-text-label {
+    color: #86efac;
+  }
+
+  .share-text-value {
+    color: #4ade80;
+  }
+
+  .share-modern-card {
+    background: #1e293b;
+    border-color: #334155;
+  }
+
+  .share-modern-card:hover {
+    border-color: var(--hover-color, #3b82f6);
+  }
+
+  .share-card-label {
+    color: #f1f5f9;
+  }
+
+  .share-card-arrow {
+    color: #64748b;
+  }
+
+  .share-modern-footer {
+    border-top-color: #334155;
+  }
+
+  .share-modern-footer span {
+    color: #64748b;
+  }
+
+  .share-card-icon {
+    filter: brightness(0.9);
   }
 }

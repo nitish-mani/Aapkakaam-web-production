@@ -1,8 +1,6 @@
-// optimized and production ready
-
 import "./profile.css";
 import { useDispatch, useSelector } from "react-redux";
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router";
 import { addDataUser, clearDataUser, setPrIsVisibleUser } from "../../utils/userslice";
@@ -28,16 +26,29 @@ const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const category = localStorage.getItem("category");
+  const containerRef = useRef(null);
 
   // Memoized selectors
   const userData = useSelector((store) =>
     category === "user" ? store.user.data : store.vendor.data,
   );
-  const isPrVisible = useSelector((store) =>
-    category === "user" ? store.user.isPrVisibleUser : store.vendor.isPrVisibleVendor,
-  );
+
+  // Get language from Redux store
+  const lang = useSelector((store) => store.category?.selectLanguage || "en");
 
   const token = useMemo(() => `Bearer ${userData[0]?.token}`, [userData]);
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "instant",
+    });
+
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
+    }
+  }, []);
 
   // State management
   const [editStates, setEditStates] = useState({
@@ -83,11 +94,7 @@ const Profile = () => {
   }, [category, dispatch, navigate]);
 
   const handleCrossInProfile = useCallback(() => {
-    if (category === "user") {
-      dispatch(setPrIsVisibleUser(false));
-    } else if (category === "vendor") {
-      dispatch(setPrIsVisibleVendor(false));
-    }
+    navigate("/");
     setEditStates({
       name: false,
       email: false,
@@ -98,7 +105,6 @@ const Profile = () => {
   }, [category, dispatch]);
 
   const showError = useCallback((message) => {
-    // setErr(message);
     showWarning(message);
     setTimeout(() => setErr(""), 1000);
   }, []);
@@ -114,7 +120,7 @@ const Profile = () => {
   // API call handlers
   const handleNameUpdate = useCallback(async () => {
     if (!navigator.onLine) {
-      showError("You are offline");
+      showError(lang === "hin" ? "आप ऑफलाइन हैं" : "You are offline");
       return;
     }
 
@@ -142,25 +148,25 @@ const Profile = () => {
       localStorage.setItem(category, JSON.stringify(updatedData));
       handleEditToggle("name");
     } catch (error) {
-      showError(error.response.data.message);
+      showError(error.response?.data?.message || "Something went wrong");
     } finally {
       setIsLoading((prev) => ({ ...prev, name: false }));
     }
-  }, [category, formData.name, userData, token, dispatch, handleEditToggle, showError]);
+  }, [category, formData.name, userData, token, dispatch, handleEditToggle, showError, lang]);
+
   useEffect(() => {
     if (err) showError(err);
   }, [err]);
+
   const handleWageRateUpdate = useCallback(async () => {
     if (!navigator.onLine) {
-      showError("You are offline");
+      showError(lang === "hin" ? "आप ऑफलाइन हैं" : "You are offline");
       return;
     }
-    // console.log(wageRateType, wageRate);
     setIsLoading((prev) => ({ ...prev, wageRate: true }));
     setIsLoading((prev) => ({ ...prev, wageRateType: true }));
 
     try {
-      console.log(formData.wageRateType, formData.wageRate);
       const response = await axios.patch(
         `${SERVER_URL}/${category}/wageRate`,
         {
@@ -180,7 +186,7 @@ const Profile = () => {
       localStorage.setItem(category, JSON.stringify(updatedData));
       handleEditToggle("wageRate");
     } catch (error) {
-      showError(error.response.data.message);
+      showError(error.response?.data?.message || "Something went wrong");
     } finally {
       setIsLoading((prev) => ({ ...prev, wageRate: false }));
       setIsLoading((prev) => ({ ...prev, wageRateType: false }));
@@ -194,6 +200,7 @@ const Profile = () => {
     dispatch,
     handleEditToggle,
     showError,
+    lang,
   ]);
 
   // Navigation handlers
@@ -224,6 +231,7 @@ const Profile = () => {
   const handleShare = useCallback(() => {
     navigateTo("/share");
   }, [navigateTo]);
+
   const handleAttendanceReport = useCallback(() => {
     navigateTo("/attendanceReport");
   }, [navigateTo]);
@@ -239,6 +247,7 @@ const Profile = () => {
   const handleAddAddress = useCallback(() => {
     navigateTo("/address");
   }, [navigateTo]);
+
   const handleEarnings = useCallback(() => {
     navigateTo("/earnings");
   }, [navigateTo]);
@@ -254,10 +263,6 @@ const Profile = () => {
   const handleCreateConcern = useCallback(() => {
     navigateTo("/concern");
   }, [navigateTo]);
-
-  // const handleProfileImage = useCallback(() => {
-  //   navigateTo("/uploads");
-  // }, [navigateTo]);
 
   // Memoized profile image component
   const ProfileImage = useMemo(() => {
@@ -285,342 +290,441 @@ const Profile = () => {
     }
   }, [userData]);
 
-  if (!isPrVisible) return null;
-
   return (
-    <div className="profile">
-      <AdsterraBanner_320x50 />
+    <main className="profile profile-modern" ref={containerRef}>
+      {/* ================= HEADER ================= */}
+      <header className="profile-header">
+        <div className="profile-cover">
+          <div className="profile-cover-orb profile-cover-orb-one" />
+          <div className="profile-cover-orb profile-cover-orb-two" />
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          backgroundColor: "transparent",
-        }}
-      >
-        {ProfileImage}
-      </div>
-      {/* <p
-        onClick={handleProfileImage}
-        style={{
-          color: "blue",
-          cursor: "pointer",
-          fontSize: "1rem",
-          width: "fit-content",
-          margin: "0 auto",
-        }}
-      >
-        Upload Profile Image
-      </p> */}
-      <h2>
-        <CamleCase element={category} /> Profile
-      </h2>
-      <img
-        src={cross}
-        className="profile__close-button"
-        alt="cross"
-        style={{
-          width: "20px",
-          position: "absolute",
-          top: ".5rem",
-          right: ".5rem",
-          cursor: "pointer",
-        }}
-        onClick={handleCrossInProfile}
-      />
-      {/* Name Field */}
-      <div>
-        <span className="border-bottom">Name </span>
-        <span className="span email-grid ">
-          {editStates.name ? (
-            <input
-              type="text"
-              placeholder="Name"
-              autoFocus
-              value={formData.name}
-              onChange={(e) => handleInputChange("name", e.target.value)}
-              style={{
-                height: "2.5rem",
-                border: "2px solid black",
-                paddingLeft: "1rem",
-                borderRadius: ".5rem",
-              }}
-            />
-          ) : (
-            <CamleCase element={userData[0]?.name} />
-          )}
-
-          <span
-            className="verify-btn span-child"
-            onClick={editStates.name ? handleNameUpdate : () => handleEditToggle("name")}
-            style={{
-              color: editStates.name ? "white" : "",
-              border: editStates.name ? "none" : "",
-              backgroundColor: editStates.name ? "blue" : "",
-              width: isLoading.name ? "5rem" : "",
-              height: isLoading.name ? "3rem" : "",
-            }}
-          >
-            {editStates.name ? isLoading.name ? <div className="loading"></div> : "Submit" : "Edit"}
-          </span>
-        </span>
-      </div>
-      {/* Phone Number Field */}
-      <div>
-        <span className="border-bottom">Mobile No</span>
-        <span className="span email-grid ">
-          {userData[0]?.phoneNo}
-
-          <span
-            className="verify-btn"
-            style={{
-              backgroundColor: userData[0]?.verifyPhoneNo ? "green" : "",
-              color: userData[0]?.verifyPhoneNo ? "white" : "",
-              border: userData[0]?.verifyPhoneNo ? "none" : "",
-            }}
-          >
-            {userData[0]?.verifyPhoneNo ? "Verified" : "Verify"}
-          </span>
-        </span>
-      </div>
-      {/* Orders Field */}
-      <div>
-        <span className="border-bottom">Orders </span>
-        <span className="span email-grid ">
-          <span>{userData[0]?.orders}</span>
-          <span className="verify-btn" onClick={handleOrdersView}>
-            view
-          </span>
-        </span>
-      </div>
-      {/* Share Field */}
-      <div>
-        <span className="border-bottom">Share</span>
-        <span className="span email-grid ">
-          <span>{userData[0]?.share}</span>
-          <span className="verify-btn" onClick={handleShareView}>
-            view
-          </span>
-          <span className="verify-btn btn1" onClick={handleShare}>
-            Share
-          </span>
-        </span>
-      </div>
-      {/* Vendor-specific fields */}
-      {category === "vendor" && (
-        <>
-          {/* Bookings Field */}
-          <div>
-            <span className="border-bottom">Bookings </span>
-            <span className="span email-grid ">
-              <span>{userData[0]?.bookings}</span>
-              <span className="verify-btn" onClick={handleBookingsView}>
-                view
-              </span>
-              <span className="verify-btn btn1" onClick={handleBookings}>
-                Book Now
-              </span>
-            </span>
-          </div>
-
-          {/* Ratings Field */}
-          <div>
-            <span className="span email-grid ">Ratings</span>
-            <span style={{ color: "green" }}>
-              {userData[0]?.rating
-                ? `${userData[0]?.rating} / 5 (${userData[0]?.ratingCount})`
-                : "No Ratings"}
-            </span>
-          </div>
-
-          {/* Wage Rate Field */}
-          <div>
-            <span>Wage-rate</span>
-            <span className="span email-grid ">
-              <span>
-                {editStates.wageRate ? (
-                  <>
-                    <input
-                      type="Number"
-                      placeholder="Wage Rate"
-                      autoFocus
-                      value={formData.wageRate}
-                      onChange={(e) => handleInputChange("wageRate", e.target.value)}
-                      style={{
-                        height: "2.5rem",
-                        border: "2px solid black",
-                        paddingLeft: "1rem",
-                        borderRadius: ".5rem",
-                      }}
-                    />
-                    <div style={{ display: "inline", margin: "0 5px" }}>/</div>
-                    <select
-                      value={formData.wageRateType}
-                      onChange={(e) => {
-                        if (!e.target.value == "")
-                          handleInputChange("wageRateType", e.target.value);
-                        else {
-                        }
-                      }}
-                      style={{
-                        height: "2.5rem",
-                        border: "2px solid black",
-                        paddingLeft: "1rem",
-                        borderRadius: ".5rem",
-                      }}
-                    >
-                      <option value="">Select</option>
-                      <option value="Day">Day</option>
-                      <option value="Hour">Hour</option>
-                      <option value="Km">Km</option>
-                      <option value="1k People">1k People</option>
-                      <option value="Service">Service</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </>
-                ) : (
-                  <span>
-                    {userData[0]?.wageRate && userData[0]?.wageRateType ? (
-                      <span>
-                        <img src={rupee} alt="" style={{ width: "1.15rem" }} />
-                        <span style={{ color: "blue" }}>
-                          {userData[0]?.wageRate} / {userData[0]?.wageRateType}
-                        </span>
-                      </span>
-                    ) : (
-                      "No Wage Rate"
-                    )}
-                  </span>
-                )}
-              </span>
-              <span
-                className="verify-btn btn1"
-                onClick={
-                  editStates.wageRate ? handleWageRateUpdate : () => handleEditToggle("wageRate")
-                }
-              >
-                {isLoading.wageRate ? (
-                  <div className="loading"></div>
-                ) : editStates.wageRate ? (
-                  "Submit"
-                ) : (
-                  "Set Wage Rate"
-                )}
-              </span>
-            </span>
-          </div>
-
-          {/* Job Profile Field */}
-          <div>
-            <span className="border-bottom">Job Profile </span>
-            <span className="span email-grid ">
-              <span style={{ color: "blue" }}>
-                <CamleCase element={userData[0]?.type} />
-              </span>
-            </span>
-          </div>
-          {/* Job commission Field */}
-          <div>
-            <span className="border-bottom">Commission </span>
-            <span className="span email-grid ">
-              <span style={{ color: "red" }}>{userData[0]?.commission} / Order</span>
-            </span>
-          </div>
-        </>
-      )}
-      {/* Balance Field */}
-      <div>
-        <span className="span email-grid ">Balance</span>
-        <span>
-          <span className="verify-btn" style={{ border: "none", margin: "0 .3rem" }}>
-            <img src={rupee} alt="" style={{ width: "1.15rem" }} />
-            <span style={{ color: userData[0]?.balance ? "green" : "red" }}>
-              {Math.round(userData[0]?.balance * 100) / 100 || 0}
-            </span>
-          </span>
-          <span className="verify-btn btn1" onClick={handleAddMoney} style={{ padding: ".4rem" }}>
-            Add Money
-          </span>
-        </span>
-      </div>
-
-      {/* Earnings Field */}
-      <div>
-        <span className="span email-grid ">Earnings </span>
-        <button
-          className="verify-btn btn1 b600"
-          onClick={handleEarnings}
-          style={{ padding: ".4rem", marginLeft: "0", marginRight: "0" }}
-        >
-          View
-        </button>
-      </div>
-      {category === "vendor" && (
-        <div>
-          <span className="border-bottom">Leave </span>
           <button
-            className="verify-btn btn1 b600"
-            onClick={takeLeave}
-            style={{ padding: ".4rem", marginLeft: "0", marginRight: "0" }}
+            type="button"
+            className="profile-close"
+            onClick={handleCrossInProfile}
+            aria-label="Close profile"
           >
-            Leave
+            <img src={cross} alt="Close" />
+          </button>
+
+          <div className="profile-avatar">
+            {ProfileImage}
+            <span className="profile-online-dot" />
+          </div>
+        </div>
+
+        <div className="profile-heading">
+          <span className="profile-badge">
+            {category === "vendor" ? "🛠️ सेवा प्रदाता • Professional" : "👤 ग्राहक • Customer"}
+          </span>
+
+          <h1>
+            <CamleCase element={userData[0]?.name || category} />
+          </h1>
+
+          <p>
+            {category === "vendor"
+              ? "आपका प्रोफेशनल प्रोफाइल • Your Professional Profile"
+              : "आपकी प्रोफाइल • Your Personal Profile"}
+          </p>
+        </div>
+      </header>
+
+      {/* ================= AD ================= */}
+      <div className="profile-ad">
+        <AdsterraBanner_320x50 />
+      </div>
+
+      {/* ================= QUICK STATS ================= */}
+      <section className="profile-stats" aria-label="Profile summary">
+        <div className="profile-stat-card blue">
+          <span className="stat-icon">📦</span>
+          <div>
+            <strong>{userData[0]?.orders || 0}</strong>
+            <small>Orders • ऑर्डर</small>
+          </div>
+        </div>
+
+        <div className="profile-stat-card purple">
+          <span className="stat-icon">🤝</span>
+          <div>
+            <strong>{userData[0]?.share || 0}</strong>
+            <small>Shares • शेयर</small>
+          </div>
+        </div>
+
+        <div className="profile-stat-card green">
+          <span className="stat-icon">💰</span>
+          <div>
+            <strong>₹{Math.round((Number(userData[0]?.balance) || 0) * 100) / 100}</strong>
+            <small>Balance • बैलेंस</small>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= ACCOUNT DETAILS ================= */}
+      <section className="profile-section">
+        <div className="profile-section-title">
+          <span>👤</span>
+          <div>
+            <h2>Account Details</h2>
+            <small>खाते की जानकारी</small>
+          </div>
+        </div>
+
+        {/* Name */}
+        <div className="profile-item">
+          <div className="profile-item-icon">👤</div>
+
+          <div className="profile-item-content">
+            <small>Name • नाम</small>
+
+            {editStates.name ? (
+              <input
+                className="modern-profile-input"
+                type="text"
+                autoFocus
+                value={formData.name}
+                onChange={(e) => handleInputChange("name", e.target.value)}
+              />
+            ) : (
+              <strong>
+                <CamleCase element={userData[0]?.name || "Not available"} />
+              </strong>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="profile-icon-action"
+            onClick={editStates.name ? handleNameUpdate : () => handleEditToggle("name")}
+            aria-label={editStates.name ? "Save name" : "Edit name"}
+          >
+            {editStates.name ? (isLoading.name ? "⏳" : "✓") : "✏️"}
           </button>
         </div>
-      )}
 
-      {/* AttendanceReport Field */}
-      {/* <div>
-        <span className="span email-grid ">AttendanceReport </span>
-        <button
-          className="verify-btn btn1 b600"
-          onClick={handleAttendanceReport}
-          style={{ padding: ".4rem", marginLeft: "0", marginRight: "0" }}
-        >
-          View
-        </button>
-      </div> */}
+        {/* Mobile */}
+        <div className="profile-item">
+          <div className="profile-item-icon">📱</div>
 
-      {/* Address Field */}
-      <div>
-        <span className="span ">Address </span>
-        {userData[0]?.address?.[0] ? (
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <div>{userData[0]?.address[0].vill}</div>
-            <div>{userData[0]?.address[0].post}</div>
-            <div>{userData[0]?.address[0].dist}</div>
-            <div>{userData[0]?.address[0].state}</div>
-            <div>{userData[0]?.address[0].pincode}</div>
+          <div className="profile-item-content">
+            <small>Mobile • मोबाइल</small>
+            <strong>{userData[0]?.phoneNo || "Not available"}</strong>
+          </div>
+
+          <span className={`profile-status ${userData[0]?.verifyPhoneNo ? "verified" : "pending"}`}>
+            {userData[0]?.verifyPhoneNo ? "✓ Verified" : "Verify"}
+          </span>
+        </div>
+
+        {/* Email */}
+        {userData[0]?.email && (
+          <div className="profile-item">
+            <div className="profile-item-icon">📧</div>
+
+            <div className="profile-item-content">
+              <small>Email • ईमेल</small>
+              <strong>{userData[0].email}</strong>
+            </div>
+
             <button
-              className="verify-btn btn1 b600"
-              onClick={handleAddAddress}
-              style={{ padding: ".4rem", marginLeft: "0", marginRight: "0" }}
+              type="button"
+              className="profile-icon-action"
+              onClick={handleEmailEdit}
+              aria-label="Edit email"
             >
-              Change Address
+              ✏️
             </button>
           </div>
+        )}
+      </section>
+
+      {/* ================= CUSTOMER ACTIVITY ================= */}
+      <section className="profile-section">
+        <div className="profile-section-title">
+          <span>⚡</span>
+          <div>
+            <h2>My Activity</h2>
+            <small>मेरी गतिविधियाँ</small>
+          </div>
+        </div>
+
+        <div className="profile-actions-grid">
+          <button type="button" onClick={handleOrdersView}>
+            <span>📦</span>
+            <strong>Orders</strong>
+            <small>मेरे ऑर्डर</small>
+          </button>
+
+          <button type="button" onClick={handleShareView}>
+            <span>🤝</span>
+            <strong>Shares</strong>
+            <small>मेरी शेयरिंग</small>
+          </button>
+
+          <button type="button" onClick={handleShare}>
+            <span>📤</span>
+            <strong>Share</strong>
+            <small>शेयर करें</small>
+          </button>
+
+          <button type="button" onClick={handleEarnings}>
+            <span>💰</span>
+            <strong>Earnings</strong>
+            <small>कमाई देखें</small>
+          </button>
+
+          {category === "vendor" && (
+            <button type="button" onClick={handleBookingsView}>
+              <span>📅</span>
+              <strong>Bookings</strong>
+              <small>बुकिंग देखें</small>
+            </button>
+          )}
+
+          {category === "vendor" && (
+            <button type="button" onClick={handleBookings}>
+              <span>🚀</span>
+              <strong>Book Now</strong>
+              <small>अभी बुक करें</small>
+            </button>
+          )}
+        </div>
+      </section>
+
+      {/* ================= VENDOR PROFILE ================= */}
+      {category === "vendor" && (
+        <section className="profile-section vendor-section">
+          <div className="profile-section-title">
+            <span>🛠️</span>
+            <div>
+              <h2>Professional Profile</h2>
+              <small>प्रोफेशनल जानकारी</small>
+            </div>
+          </div>
+
+          {/* Job Profile */}
+          <div className="profile-item">
+            <div className="profile-item-icon">🔧</div>
+
+            <div className="profile-item-content">
+              <small>Job Profile • काम</small>
+              <strong>
+                <CamleCase element={userData[0]?.type || "Not set"} />
+              </strong>
+            </div>
+          </div>
+
+          {/* Ratings */}
+          <div className="profile-item">
+            <div className="profile-item-icon">⭐</div>
+
+            <div className="profile-item-content">
+              <small>Customer Rating • रेटिंग</small>
+              <strong className="rating-value">
+                {userData[0]?.rating ? `${userData[0].rating} / 5` : "No Ratings"}
+              </strong>
+            </div>
+
+            {userData[0]?.ratingCount > 0 && (
+              <span className="rating-count">{userData[0].ratingCount} reviews</span>
+            )}
+          </div>
+
+          {/* Wage Rate */}
+          <div className="profile-item profile-item-stack-mobile">
+            <div className="profile-item-icon">💵</div>
+
+            <div className="profile-item-content">
+              <small>Wage Rate • मजदूरी</small>
+
+              {editStates.wageRate ? (
+                <div className="wage-editor">
+                  <input
+                    className="modern-profile-input"
+                    type="number"
+                    min="0"
+                    placeholder="₹ Rate"
+                    autoFocus
+                    value={formData.wageRate}
+                    onChange={(e) => handleInputChange("wageRate", e.target.value)}
+                  />
+
+                  <select
+                    className="modern-profile-select"
+                    value={formData.wageRateType}
+                    onChange={(e) => handleInputChange("wageRateType", e.target.value)}
+                  >
+                    <option value="">Select</option>
+                    <option value="Day">Per Day</option>
+                    <option value="Hour">Per Hour</option>
+                    <option value="Km">Per Km</option>
+                    <option value="1k People">Per 1k People</option>
+                    <option value="Service">Per Service</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              ) : (
+                <strong className="wage-value">
+                  {userData[0]?.wageRate && userData[0]?.wageRateType ? (
+                    <>
+                      ₹{userData[0].wageRate}
+                      <span> / {userData[0].wageRateType}</span>
+                    </>
+                  ) : (
+                    "No Wage Rate"
+                  )}
+                </strong>
+              )}
+            </div>
+
+            <button
+              type="button"
+              className="profile-icon-action profile-save-action"
+              onClick={
+                editStates.wageRate ? handleWageRateUpdate : () => handleEditToggle("wageRate")
+              }
+            >
+              {isLoading.wageRate ? (
+                <span className="profile-spinner" />
+              ) : editStates.wageRate ? (
+                "✓"
+              ) : (
+                "✏️"
+              )}
+            </button>
+          </div>
+
+          {/* Commission */}
+          <div className="profile-item">
+            <div className="profile-item-icon">📊</div>
+
+            <div className="profile-item-content">
+              <small>Commission • कमीशन</small>
+              <strong className="commission-value">{userData[0]?.commission || 0} / Order</strong>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ================= BALANCE ================= */}
+      <section className="profile-section money-section">
+        <div className="profile-section-title">
+          <span>💰</span>
+          <div>
+            <h2>Wallet & Earnings</h2>
+            <small>वॉलेट और कमाई</small>
+          </div>
+        </div>
+
+        <div className="wallet-card">
+          <div className="wallet-icon">💳</div>
+
+          <div className="wallet-info">
+            <small>Available Balance • उपलब्ध बैलेंस</small>
+            <strong>₹{Math.round((Number(userData[0]?.balance) || 0) * 100) / 100}</strong>
+          </div>
+
+          <button type="button" className="wallet-add-button" onClick={handleAddMoney}>
+            ➕ Add Money
+          </button>
+        </div>
+      </section>
+
+      {/* ================= COMPLETE ADDRESS ================= */}
+      <section className="profile-section">
+        <div className="profile-section-title">
+          <span>📍</span>
+          <div>
+            <h2>My Address</h2>
+            <small>मेरा पूरा पता • Complete Address</small>
+          </div>
+        </div>
+
+        {userData[0]?.address?.[0] ? (
+          <div className="full-address-card">
+            <div className="address-main-icon">🏠</div>
+
+            <div className="address-details">
+              {userData[0].address[0].vill && (
+                <div className="address-line">
+                  <span>🏠</span>
+                  <strong>{userData[0].address[0].vill}</strong>
+                </div>
+              )}
+
+              {userData[0].address[0].post && (
+                <div className="address-line">
+                  <span>📮</span>
+                  <span>Post: {userData[0].address[0].post}</span>
+                </div>
+              )}
+
+              {userData[0].address[0].dist && (
+                <div className="address-line">
+                  <span>🏙️</span>
+                  <span>District: {userData[0].address[0].dist}</span>
+                </div>
+              )}
+
+              {userData[0].address[0].state && (
+                <div className="address-line">
+                  <span>🗺️</span>
+                  <span>State: {userData[0].address[0].state}</span>
+                </div>
+              )}
+
+              {userData[0].address[0].pincode && (
+                <div className="address-line">
+                  <span>📌</span>
+                  <strong>PIN: {userData[0].address[0].pincode}</strong>
+                </div>
+              )}
+            </div>
+          </div>
         ) : (
-          <button
-            className="verify-btn btn1"
-            onClick={handleAddAddress}
-            style={{ marginBottom: "1rem" }}
-          >
-            Add Address
+          <div className="empty-address">
+            <span>📍</span>
+            <div>
+              <strong>Address not added</strong>
+              <small>अभी अपना पूरा पता जोड़ें • Add your address</small>
+            </div>
+          </div>
+        )}
+
+        <button type="button" className="full-width-action" onClick={handleAddAddress}>
+          📍 {userData[0]?.address?.[0] ? "Change Address • पता बदलें" : "Add Address • पता जोड़ें"}
+        </button>
+      </section>
+
+      {/* ================= HELP / LOGOUT ================= */}
+      <section className="profile-footer-actions">
+        <button type="button" className="concern-button" onClick={handleCreateConcern}>
+          <span>🆘</span>
+          <div>
+            <strong>Raise Concern</strong>
+            <small>समस्या बताएं</small>
+          </div>
+        </button>
+
+        {category === "vendor" && (
+          <button type="button" className="leave-button" onClick={takeLeave}>
+            <div>
+              <strong>🌴 Leave Management • छुट्टी प्रबंधन</strong>
+            </div>
           </button>
         )}
-      </div>
 
-      {/* <button className="btn" onClick={takeLeave}>
-        Take Leave
-      </button> */}
-      {/* <AdsterraBanner /> */}
-      {/* Logout Button */}
-      <button className="btn" onClick={handleCreateConcern} style={{ marginBottom: "1rem" }}>
-        Raise Concern
-      </button>
-      <button className="btn" onClick={handleLogout}>
-        Logout
-      </button>
-    </div>
+        <button type="button" className="logout-button" onClick={handleLogout}>
+          <span>🚪</span>
+          <div>
+            <strong>Logout</strong>
+            <small>लॉगआउट</small>
+          </div>
+        </button>
+      </section>
+    </main>
   );
 };
 

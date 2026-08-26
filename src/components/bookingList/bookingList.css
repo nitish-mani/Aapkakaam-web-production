@@ -1,0 +1,371 @@
+/* ============================================
+   MODERN BOOKING LIST - AapkaKaam
+   ============================================ */
+
+.booking-list-modern {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  border: 1px solid #e2e8f0;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.booking-list-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  border-color: #cbd5e1;
+}
+
+/* ===== STATUS BADGE ===== */
+.booking-status-badge {
+  position: absolute;
+  top: -10px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  border: 2px solid;
+  font-size: 12px;
+  font-weight: 700;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  z-index: 2;
+}
+
+.status-icon {
+  font-size: 12px;
+}
+
+.status-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ===== CONTENT ===== */
+.booking-content-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 4px;
+}
+
+.booking-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  gap: 12px;
+}
+
+.booking-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+  min-width: 80px;
+}
+
+.booking-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  text-align: right;
+  word-break: break-word;
+  flex: 1;
+}
+
+.booking-date {
+  color: #2563eb;
+}
+
+/* ===== ADDRESS SECTION ===== */
+.booking-address-section {
+  display: flex;
+  padding: 6px 0;
+  gap: 12px;
+}
+
+.booking-address-section .booking-label {
+  min-width: 80px;
+}
+
+.booking-address-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: right;
+}
+
+.address-line {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+}
+
+.address-label {
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+/* ===== RATING SECTION ===== */
+.booking-rating-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 6px;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 4px;
+}
+
+.rating-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rating-number {
+  font-weight: 700;
+  color: #f59e0b;
+}
+
+.not-rated {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.review-value {
+  max-width: 60%;
+}
+
+.review-text {
+  font-style: italic;
+  color: #475569;
+  font-weight: 500;
+  word-wrap: break-word;
+}
+
+.no-review {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+/* ===== STATUS ROW ===== */
+.status-row {
+  padding-top: 4px;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 2px;
+}
+
+.status-value {
+  font-weight: 700;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .booking-list-modern {
+    padding: 14px 16px;
+    border-radius: 14px;
+  }
+
+  .booking-status-badge {
+    top: -8px;
+    right: 12px;
+    padding: 3px 12px;
+    font-size: 10px;
+  }
+
+  .booking-label {
+    font-size: 12px;
+    min-width: 60px;
+  }
+
+  .booking-value {
+    font-size: 12px;
+  }
+
+  .booking-address-section {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .booking-address-details {
+    text-align: left;
+    padding-left: 4px;
+  }
+
+  .address-line {
+    justify-content: flex-start;
+    font-size: 12px;
+  }
+
+  .booking-row {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .booking-value {
+    text-align: left;
+    flex: 0 0 100%;
+  }
+
+  .review-value {
+    max-width: 100%;
+  }
+
+  .booking-address-section .booking-label {
+    min-width: auto;
+  }
+
+  .rating-display {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 400px) {
+  .booking-list-modern {
+    padding: 12px 12px;
+    border-radius: 12px;
+  }
+
+  .booking-status-badge {
+    top: -6px;
+    right: 8px;
+    padding: 2px 10px;
+    font-size: 9px;
+  }
+
+  .booking-label {
+    font-size: 11px;
+    min-width: 50px;
+  }
+
+  .booking-value {
+    font-size: 11px;
+  }
+
+  .address-line {
+    font-size: 11px;
+  }
+}
+
+/* ===== DARK MODE ===== */
+@media (prefers-color-scheme: dark) {
+  .booking-list-modern {
+    background: #1e293b;
+    border-color: #334155;
+  }
+
+  .booking-list-modern:hover {
+    border-color: #475569;
+  }
+
+  .booking-label {
+    color: #64748b;
+  }
+
+  .booking-value {
+    color: #f1f5f9;
+  }
+
+  .booking-date {
+    color: #60a5fa;
+  }
+
+  .booking-address-section .booking-label {
+    color: #64748b;
+  }
+
+  .address-line {
+    color: #94a3b8;
+  }
+
+  .address-label {
+    color: #64748b;
+  }
+
+  .booking-status-badge {
+    background: #1e293b;
+    border-color: #475569;
+  }
+
+  .status-label {
+    color: #f1f5f9;
+  }
+
+  .booking-rating-section {
+    border-top-color: #334155;
+  }
+
+  .rating-number {
+    color: #fbbf24;
+  }
+
+  .review-text {
+    color: #94a3b8;
+  }
+
+  .status-row {
+    border-top-color: #334155;
+  }
+
+  .not-rated {
+    color: #64748b;
+  }
+
+  .no-review {
+    color: #64748b;
+  }
+
+  .booking-value .rating-display {
+    color: #fbbf24;
+  }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes bookingSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.booking-list-modern {
+  animation: bookingSlideIn 0.3s ease;
+}
+
+/* Status color overrides */
+.status-pending {
+  background: #eff6ff !important;
+  color: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+.status-completed {
+  background: #f0fdf4 !important;
+  color: #16a34a !important;
+  border-color: #16a34a !important;
+}
+
+.status-canceled {
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+  border-color: #dc2626 !important;
+}

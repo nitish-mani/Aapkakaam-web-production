@@ -1,7 +1,9 @@
+// Modern Order List Component - AapkaKaam
+
 import { useEffect, useState } from "react";
 import { SERVER_URL } from "../../utils/base";
 import CamleCase from "../camleCase/camleCase";
-import "./orderList";
+import "./orderList.css";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { setCancelOrder } from "../../utils/categoryslice";
@@ -10,7 +12,7 @@ import { addDataUser } from "../../utils/userslice";
 import { showConfirm, showError, showSuccess, showInfo } from "../showAlert";
 import Swal from "sweetalert2";
 
-export default function OrderList({ element, orderStatus }) {
+export default function OrderList({ element, orderStatus, lang = "en" }) {
   const dispatch = useDispatch();
 
   const category = localStorage.getItem("category");
@@ -31,388 +33,298 @@ export default function OrderList({ element, orderStatus }) {
 
   const token = `Bearer ${userData[0]?.token || JSON.parse(localStorage.getItem(category))?.token}`;
 
+  // Helper function for language
+  const t = (en, hi) => {
+    return lang === "hin" ? hi : en;
+  };
+
   async function handleCancelOrder(bookingId) {
     if (!navigator.onLine) {
-      setErr("You are offline");
-      setTimeout(() => {
-        setErr("");
-      }, 3000);
+      setErr(t("You are offline", "आप ऑफलाइन हैं"));
+      setTimeout(() => setErr(""), 3000);
       return;
     }
 
     const result = await showConfirm({
-      title: "Are you sure?",
-      text: "You want to cancel this order?",
-      confirmButtonText: "Yes, cancel it!",
-      cancelButtonText: "No, keep it",
+      title: t("Are you sure?", "क्या आप निश्चित हैं?"),
+      text: t("You want to cancel this order?", "आप इस ऑर्डर को रद्द करना चाहते हैं?"),
+      confirmButtonText: t("Yes, cancel it!", "हाँ, रद्द करें!"),
+      cancelButtonText: t("No, keep it", "नहीं, रखें"),
       icon: "warning",
     });
 
-    if (!result.isConfirmed) {
-      return;
-    }
+    if (!result.isConfirmed) return;
 
     setIsLoadingCancelOrder(true);
 
-    if (category == "user")
-      axios
-        .patch(
-          `${SERVER_URL}/bookings/cancelOrderU`,
-          {
-            bookingId,
-          },
-          {
-            headers: { Authorization: token },
-          },
-        )
-        .then((succ) => {
-          const data = { ...userData[0] };
-          dispatch(addDataUser(data));
-          localStorage.setItem(category, JSON.stringify(data));
-          setSuccess(succ.data.message);
-          dispatch(setCancelOrder(!cancelOrder));
-          setIsLoadingCancelOrder(false);
-          setTimeout(() => {
-            setSuccess("");
-          }, 1000);
-        })
-        .catch((err) => {
-          setErr(err.response.data.message);
-          setIsLoadingCancelOrder(false);
-          setTimeout(() => {
-            setErr("");
-          }, 3000);
-        });
-    else if (category == "vendor")
-      axios
-        .patch(
-          `${SERVER_URL}/bookings/cancelOrderV`,
-          {
-            bookingId,
-          },
-          {
-            headers: { Authorization: token },
-          },
-        )
-        .then((succ) => {
-          const data = { ...userData[0] };
-          dispatch(addDataVendor(data));
-          localStorage.setItem(category, JSON.stringify(data));
-          setSuccess(succ.data.message);
-          dispatch(setCancelOrder(!cancelOrder));
-          setIsLoadingCancelOrder(false);
-          setTimeout(() => {
-            setSuccess("");
-          }, 1000);
-        })
-        .catch((err) => {
-          setErr(err.response.data.message);
-          setIsLoadingCancelOrder(false);
-          setTimeout(() => {
-            setErr("");
-          }, 3000);
-        });
+    const endpoint =
+      category === "user"
+        ? `${SERVER_URL}/bookings/cancelOrderU`
+        : `${SERVER_URL}/bookings/cancelOrderV`;
+
+    const action = category === "user" ? addDataUser : addDataVendor;
+
+    try {
+      const succ = await axios.patch(
+        endpoint,
+        { bookingId },
+        { headers: { Authorization: token } },
+      );
+
+      const data = { ...userData[0] };
+      dispatch(action(data));
+      localStorage.setItem(category, JSON.stringify(data));
+      setSuccess(succ.data.message);
+      dispatch(setCancelOrder(!cancelOrder));
+      setIsLoadingCancelOrder(false);
+      setTimeout(() => setSuccess(""), 1000);
+    } catch (err) {
+      setErr(
+        err.response?.data?.message || t("Failed to cancel order", "ऑर्डर रद्द करने में विफल"),
+      );
+      setIsLoadingCancelOrder(false);
+      setTimeout(() => setErr(""), 3000);
+    }
   }
 
   async function handleCompletedOrder(bookingId) {
     if (!navigator.onLine) {
-      setErr("You are offline");
-      setTimeout(() => {
-        setErr("");
-      }, 3000);
+      setErr(t("You are offline", "आप ऑफलाइन हैं"));
+      setTimeout(() => setErr(""), 3000);
       return;
     }
 
     const result = await showConfirm({
-      title: "Are you sure?",
-      text: "You want to mark this order as complete?",
-      confirmButtonText: "Yes, mark it complete!",
-      cancelButtonText: "No, keep it",
+      title: t("Are you sure?", "क्या आप निश्चित हैं?"),
+      text: t(
+        "You want to mark this order as complete?",
+        "आप इस ऑर्डर को पूर्ण के रूप में चिह्नित करना चाहते हैं?",
+      ),
+      confirmButtonText: t("Yes, mark it complete!", "हाँ, पूर्ण चिह्नित करें!"),
+      cancelButtonText: t("No, keep it", "नहीं, रखें"),
       icon: "info",
     });
 
-    if (!result.isConfirmed) {
-      return;
-    }
+    if (!result.isConfirmed) return;
 
     setIsLoadingCompleteOrder(true);
 
-    if (category == "user")
-      axios
-        .patch(
-          `${SERVER_URL}/bookings/orderCompletedU`,
-          {
-            bookingId,
-          },
-          {
-            headers: { Authorization: token },
-          },
-        )
-        .then((succ) => {
-          setSuccess(succ.data.message);
-          dispatch(setCancelOrder(!cancelOrder));
-          setIsLoadingCompleteOrder(false);
-          setTimeout(() => {
-            setSuccess("");
-          }, 1000);
-        })
-        .catch((err) => {
-          setErr(err.response.data.message);
-          setIsLoadingCompleteOrder(false);
-          setTimeout(() => {
-            setErr("");
-          }, 3000);
-        });
-    else if (category == "vendor")
-      axios
-        .patch(
-          `${SERVER_URL}/bookings/orderCompletedV`,
-          {
-            bookingId,
-          },
-          {
-            headers: { Authorization: token },
-          },
-        )
-        .then((succ) => {
-          setSuccess(succ.data.message);
-          dispatch(setCancelOrder(!cancelOrder));
-          setIsLoadingCompleteOrder(false);
-          setTimeout(() => {
-            setSuccess("");
-          }, 1000);
-        })
-        .catch((err) => {
-          setErr(err.response.data.message);
-          setIsLoadingCompleteOrder(false);
-          setTimeout(() => {
-            setErr("");
-          }, 3000);
-        });
+    const endpoint =
+      category === "user"
+        ? `${SERVER_URL}/bookings/orderCompletedU`
+        : `${SERVER_URL}/bookings/orderCompletedV`;
+
+    try {
+      const succ = await axios.patch(
+        endpoint,
+        { bookingId },
+        { headers: { Authorization: token } },
+      );
+
+      setSuccess(succ.data.message);
+      dispatch(setCancelOrder(!cancelOrder));
+      setIsLoadingCompleteOrder(false);
+      setTimeout(() => setSuccess(""), 1000);
+    } catch (err) {
+      setErr(
+        err.response?.data?.message || t("Failed to complete order", "ऑर्डर पूर्ण करने में विफल"),
+      );
+      setIsLoadingCompleteOrder(false);
+      setTimeout(() => setErr(""), 3000);
+    }
   }
 
-  // Handle rating with confirmation dialog
-  // Handle rating with confirmation dialog
   async function handleRatings(bookingId, existingRating) {
-    console.count("handleRatings");
-    // Already rated - Premium notification with confetti effect
+    // Already rated
     if (existingRating) {
-      const ratingEmojis = {
-        1: "😔",
-        2: "😕",
-        3: "😐",
-        4: "😊",
-        5: "🌟",
-      };
+      const ratingEmojis = { 1: "😔", 2: "😕", 3: "😐", 4: "😊", 5: "🌟" };
 
       await Swal.fire({
-        title: `${ratingEmojis[existingRating]} Already Rated!`,
+        title: `${ratingEmojis[existingRating]} ${t("Already Rated!", "पहले ही रेटिंग दी गई!")}`,
         html: `
-        <div style="font-family: 'Inter', sans-serif; padding: 10px 0;">
-          <div style="font-size: 64px; margin-bottom: 12px;">
-            ${"⭐".repeat(existingRating)}${"☆".repeat(5 - existingRating)}
+          <div style="padding: 10px 0;">
+            <div style="font-size: 64px; margin-bottom: 12px;">
+              ${"⭐".repeat(existingRating)}${"☆".repeat(5 - existingRating)}
+            </div>
+            <div style="font-size: 18px; font-weight: 600; color: #1f2937;">
+              ${t("You rated this vendor", "आपने इस विक्रेता को रेटिंग दी")} ${existingRating}/5
+            </div>
+            <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">
+              ${t("Thank you for your feedback!", "आपकी प्रतिक्रिया के लिए धन्यवाद!")} 🙏
+            </div>
           </div>
-          <div style="font-size: 18px; font-weight: 600; color: #1f2937;">
-            You rated this vendor ${existingRating}/5
-          </div>
-          <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">
-            Thank you for your feedback! 🙏
-          </div>
-        </div>
-      `,
+        `,
         icon: "info",
         confirmButtonColor: "#7c3aed",
         confirmButtonText: "👍 Got it",
-        background: "#ffffff",
-        backdrop: "rgba(0,0,0,0.6) blur(10px)",
         timer: 4000,
         timerProgressBar: true,
-        showClass: {
-          popup: "animate__animated animate__fadeInUp animate__faster",
-        },
-        hideClass: {
-          popup: "animate__animated animate__fadeOutDown animate__faster",
-        },
       });
       return;
     }
 
-    // Offline check - Modern toast-style alert
     if (!navigator.onLine) {
       await Swal.fire({
-        title: "🌐 You're Offline",
+        title: "🌐 " + t("You're Offline", "आप ऑफलाइन हैं"),
         html: `
-        <div style="padding: 10px 0;">
-          <div style="font-size: 48px; margin-bottom: 8px;">📡</div>
-          <div style="font-size: 15px; color: #6b7280;">
-            Please check your internet connection<br>and try again
+          <div style="padding: 10px 0;">
+            <div style="font-size: 48px; margin-bottom: 8px;">📡</div>
+            <div style="font-size: 15px; color: #6b7280;">
+              ${t("Please check your internet connection and try again", "कृपया अपना इंटरनेट कनेक्शन जांचें और पुनः प्रयास करें")}
+            </div>
           </div>
-        </div>
-      `,
+        `,
         icon: "warning",
         confirmButtonColor: "#7c3aed",
         confirmButtonText: "Got it",
-        background: "#ffffff",
-        backdrop: "rgba(0,0,0,0.5)",
-        showClass: {
-          popup: "animate__animated animate__shakeX",
-        },
       });
       return;
     }
 
-    // Rating Modal with proper cancel handling
+    // Rating Modal
     const result = await Swal.fire({
       title: "",
       html: `
-      <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 4px 0; position: relative;">
-        <!-- Header with gradient -->
-        <div style="
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          margin: -30px -30px 20px -30px;
-          padding: 25px 30px 20px 30px;
-          border-radius: 16px 16px 0 0;
-          color: white;
-        ">
-          <div style="font-size: 14px; opacity: 0.8; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 500;">
-            Share Your Experience
+        <div style="font-family: 'Inter', sans-serif; padding: 4px 0;">
+          <div style="
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: -30px -30px 20px -30px;
+            padding: 25px 30px 20px 30px;
+            border-radius: 16px 16px 0 0;
+            color: white;
+          ">
+            <div style="font-size: 14px; opacity: 0.8; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 500;">
+              ${t("Share Your Experience", "अपना अनुभव साझा करें")}
+            </div>
+            <div style="font-size: 24px; font-weight: 700; margin-top: 4px;">
+              ${t("How was your booking?", "आपकी बुकिंग कैसी थी?")} ✨
+            </div>
+            <div style="font-size: 14px; opacity: 0.85; margin-top: 6px;">
+              ${t("Your feedback helps others make better decisions", "आपकी प्रतिक्रिया दूसरों को बेहतर निर्णय लेने में मदद करती है")}
+            </div>
           </div>
-          <div style="font-size: 24px; font-weight: 700; margin-top: 4px;">
-            How was your booking? ✨
-          </div>
-          <div style="font-size: 14px; opacity: 0.85; margin-top: 6px;">
-            Your feedback helps others make better decisions
-          </div>
-        </div>
 
-        <!-- Rating Section -->
-        <div style="margin: 20px 0 16px 0; text-align: center;">
-          <div style="display: flex; justify-content: center; gap: 10px; font-size: 44px;" id="star-container">
-            <span class="star" data-value="1" style="cursor: pointer; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); color: #e5e7eb; user-select: none;">☆</span>
-            <span class="star" data-value="2" style="cursor: pointer; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); color: #e5e7eb; user-select: none;">☆</span>
-            <span class="star" data-value="3" style="cursor: pointer; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); color: #e5e7eb; user-select: none;">☆</span>
-            <span class="star" data-value="4" style="cursor: pointer; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); color: #e5e7eb; user-select: none;">☆</span>
-            <span class="star" data-value="5" style="cursor: pointer; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); color: #e5e7eb; user-select: none;">☆</span>
+          <div style="margin: 20px 0 16px 0; text-align: center;">
+            <div style="display: flex; justify-content: center; gap: 10px; font-size: 44px;" id="star-container">
+              <span class="star" data-value="1" style="cursor: pointer; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); color: #e5e7eb; user-select: none;">☆</span>
+              <span class="star" data-value="2" style="cursor: pointer; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); color: #e5e7eb; user-select: none;">☆</span>
+              <span class="star" data-value="3" style="cursor: pointer; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); color: #e5e7eb; user-select: none;">☆</span>
+              <span class="star" data-value="4" style="cursor: pointer; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); color: #e5e7eb; user-select: none;">☆</span>
+              <span class="star" data-value="5" style="cursor: pointer; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); color: #e5e7eb; user-select: none;">☆</span>
+            </div>
+            <div style="font-size: 16px; font-weight: 600; color: #1f2937; margin-top: 8px; min-height: 28px;" id="rating-label">
+              ${t("Tap a star to rate", "रेटिंग देने के लिए स्टार पर टैप करें")}
+            </div>
+            <div style="font-size: 13px; color: #9ca3af; margin-top: 4px;" id="rating-subtext">
+              ${t("Choose from 1 to 5 stars", "1 से 5 स्टार में से चुनें")}
+            </div>
           </div>
-          <div style="font-size: 16px; font-weight: 600; color: #1f2937; margin-top: 8px; min-height: 28px;" id="rating-label">
-            Tap a star to rate
-          </div>
-          <div style="font-size: 13px; color: #9ca3af; margin-top: 4px;" id="rating-subtext">
-            Choose from 1 to 5 stars
-          </div>
-        </div>
 
-        <!-- Slider -->
-        <div style="margin: 16px 0 20px 0; padding: 0 4px;">
-          <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 500; color: #9ca3af; margin-bottom: 6px;">
-            <span>Not Great</span>
-            <span>Average</span>
-            <span>Amazing</span>
+          <div style="margin: 16px 0 20px 0; padding: 0 4px;">
+            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 500; color: #9ca3af; margin-bottom: 6px;">
+              <span>${t("Not Great", "बहुत अच्छा नहीं")}</span>
+              <span>${t("Average", "औसत")}</span>
+              <span>${t("Amazing", "अद्भुत")}</span>
+            </div>
+            <input
+              id="swal-rating"
+              type="range"
+              min="1"
+              max="5"
+              step="1"
+              value="3"
+              style="
+                width: 100%;
+                height: 8px;
+                border-radius: 4px;
+                background: linear-gradient(to right, #fbbf24, #f59e0b, #f97316);
+                outline: none;
+                -webkit-appearance: none;
+                appearance: none;
+              "
+            />
+            <style>
+              #swal-rating::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #7c3aed, #6d28d9);
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+                transition: all 0.2s;
+              }
+              #swal-rating::-webkit-slider-thumb:hover {
+                transform: scale(1.15);
+                box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
+              }
+              #swal-rating::-moz-range-thumb {
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #7c3aed, #6d28d9);
+                cursor: pointer;
+                border: none;
+                box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+              }
+            </style>
           </div>
-          <input
-            id="swal-rating"
-            type="range"
-            min="1"
-            max="5"
-            step="1"
-            value="3"
-            style="
-              width: 100%;
-              height: 8px;
-              border-radius: 4px;
-              background: linear-gradient(to right, #fbbf24, #f59e0b, #f97316);
-              outline: none;
-              -webkit-appearance: none;
-              appearance: none;
-            "
-          />
-          <style>
-            #swal-rating::-webkit-slider-thumb {
-              -webkit-appearance: none;
-              appearance: none;
-              width: 22px;
-              height: 22px;
-              border-radius: 50%;
-              background: linear-gradient(135deg, #7c3aed, #6d28d9);
-              cursor: pointer;
-              box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
-              transition: all 0.2s;
-            }
-            #swal-rating::-webkit-slider-thumb:hover {
-              transform: scale(1.15);
-              box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
-            }
-            #swal-rating::-moz-range-thumb {
-              width: 22px;
-              height: 22px;
-              border-radius: 50%;
-              background: linear-gradient(135deg, #7c3aed, #6d28d9);
-              cursor: pointer;
-              border: none;
-              box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
-            }
-          </style>
-        </div>
 
-        <!-- Review Section -->
-        <div style="margin-top: 16px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <label style="font-weight: 600; color: #1f2937; font-size: 14px;">
-              📝 Write a Review
-            </label>
-            <span style="font-size: 12px; color: #9ca3af;" id="char-count">0/500</span>
+          <div style="margin-top: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label style="font-weight: 600; color: #1f2937; font-size: 14px;">
+                📝 ${t("Write a Review", "समीक्षा लिखें")}
+              </label>
+              <span style="font-size: 12px; color: #9ca3af;" id="char-count">0/500</span>
+            </div>
+            <textarea
+              id="swal-review"
+              maxlength="500"
+              placeholder="${t("What stood out to you? Share the highlights of your experience...", "आपको क्या खास लगा? अपने अनुभव के मुख्य बिंदु साझा करें...")}"
+              style="
+                width: 100%;
+                padding: 14px 16px;
+                border: 2px solid #e5e7eb;
+                border-radius: 12px;
+                font-size: 14px;
+                font-family: 'Inter', sans-serif;
+                resize: vertical;
+                min-height: 80px;
+                max-height: 150px;
+                transition: all 0.3s ease;
+                background: #fafafa;
+                color: #1f2937;
+                line-height: 1.6;
+              "
+            ></textarea>
+            <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
+              <span class="suggestion-chip" data-text="${t("Great service!", "बहुत अच्छी सेवा!")} 👍" style="font-size: 11px; background: #f3f4f6; padding: 4px 12px; border-radius: 20px; color: #6b7280; cursor: pointer; transition: all 0.2s;">
+                👍 ${t("Great", "बहुत अच्छा")}
+              </span>
+              <span class="suggestion-chip" data-text="${t("Professional and friendly", "पेशेवर और मिलनसार")} 😊" style="font-size: 11px; background: #f3f4f6; padding: 4px 12px; border-radius: 20px; color: #6b7280; cursor: pointer; transition: all 0.2s;">
+                😊 ${t("Friendly", "मिलनसार")}
+              </span>
+              <span class="suggestion-chip" data-text="${t("Highly recommended!", "अत्यधिक अनुशंसित!")} ⭐" style="font-size: 11px; background: #f3f4f6; padding: 4px 12px; border-radius: 20px; color: #6b7280; cursor: pointer; transition: all 0.2s;">
+                ⭐ ${t("Recommend", "अनुशंसा")}
+              </span>
+              <span class="suggestion-chip" data-text="${t("Will book again", "फिर से बुक करूंगा")} 🔄" style="font-size: 11px; background: #f3f4f6; padding: 4px 12px; border-radius: 20px; color: #6b7280; cursor: pointer; transition: all 0.2s;">
+                🔄 ${t("Again", "फिर से")}
+              </span>
+            </div>
           </div>
-          <textarea
-            id="swal-review"
-            maxlength="500"
-            placeholder="What stood out to you? Share the highlights of your experience..."
-            style="
-              width: 100%;
-              padding: 14px 16px;
-              border: 2px solid #e5e7eb;
-              border-radius: 12px;
-              font-size: 14px;
-              font-family: 'Inter', sans-serif;
-              resize: vertical;
-              min-height: 80px;
-              max-height: 150px;
-              transition: all 0.3s ease;
-              background: #fafafa;
-              color: #1f2937;
-              line-height: 1.6;
-            "
-          ></textarea>
-          <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
-            <span class="suggestion-chip" data-text="Great service! 👍" style="font-size: 11px; background: #f3f4f6; padding: 4px 12px; border-radius: 20px; color: #6b7280; cursor: pointer; transition: all 0.2s;">
-              👍 Great
-            </span>
-            <span class="suggestion-chip" data-text="Professional and friendly 😊" style="font-size: 11px; background: #f3f4f6; padding: 4px 12px; border-radius: 20px; color: #6b7280; cursor: pointer; transition: all 0.2s;">
-              😊 Friendly
-            </span>
-            <span class="suggestion-chip" data-text="Highly recommended! ⭐" style="font-size: 11px; background: #f3f4f6; padding: 4px 12px; border-radius: 20px; color: #6b7280; cursor: pointer; transition: all 0.2s;">
-              ⭐ Recommend
-            </span>
-            <span class="suggestion-chip" data-text="Will book again 🔄" style="font-size: 11px; background: #f3f4f6; padding: 4px 12px; border-radius: 20px; color: #6b7280; cursor: pointer; transition: all 0.2s;">
-              🔄 Again
-            </span>
-          </div>
-        </div>
 
-        <!-- Quick tips -->
-        <div style="margin-top: 16px; padding: 10px 14px; background: #f3f4f6; border-radius: 8px; font-size: 12px; color: #6b7280; text-align: center;">
-          💡 Your review helps the community. Be honest and constructive!
+          <div style="margin-top: 16px; padding: 10px 14px; background: #f3f4f6; border-radius: 8px; font-size: 12px; color: #6b7280; text-align: center;">
+            💡 ${t("Your review helps the community. Be honest and constructive!", "आपकी समीक्षा समुदाय की मदद करती है। ईमानदार और रचनात्मक बनें!")}
+          </div>
         </div>
-      </div>
-    `,
+      `,
       showCancelButton: true,
-      confirmButtonText: "🌟 Submit Review",
-      cancelButtonText: "Cancel",
+      confirmButtonText: "🌟 " + t("Submit Review", "समीक्षा सबमिट करें"),
+      cancelButtonText: t("Cancel", "रद्द करें"),
       confirmButtonColor: "#7c3aed",
       cancelButtonColor: "#ef4444",
-      allowOutsideClick: false,
       reverseButtons: true,
-      backdrop: "rgba(0,0,0,0.7) blur(4px)",
-      background: "#ffffff",
       width: 520,
       customClass: {
         confirmButton: "swal-confirm",
@@ -426,11 +338,6 @@ export default function OrderList({ element, orderStatus }) {
         const reviewText = document.getElementById("swal-review");
         const charCount = document.getElementById("char-count");
         const suggestionChips = document.querySelectorAll(".suggestion-chip");
-        const cancelBtn = Swal.getCancelButton();
-
-        cancelBtn.addEventListener("click", () => {
-          console.log("Cancel clicked");
-        });
 
         let selectedRating = 3;
 
@@ -451,21 +358,30 @@ export default function OrderList({ element, orderStatus }) {
 
         function updateLabels(value) {
           const labels = {
-            1: { main: "😔 Needs Improvement", sub: "We'll do better next time" },
-            2: { main: "😕 Could Be Better", sub: "Thank you for your honesty" },
-            3: { main: "😐 It Was Okay", sub: "Room for improvement" },
-            4: { main: "😊 Good Experience", sub: "Glad you enjoyed it!" },
-            5: { main: "🌟 Excellent!", sub: "Absolutely amazing experience!" },
+            1: {
+              main: t("😔 Needs Improvement", "😔 सुधार की आवश्यकता"),
+              sub: t("We'll do better next time", "हम अगली बार बेहतर करेंगे"),
+            },
+            2: {
+              main: t("😕 Could Be Better", "😕 बेहतर हो सकता है"),
+              sub: t("Thank you for your honesty", "आपकी ईमानदारी के लिए धन्यवाद"),
+            },
+            3: {
+              main: t("😐 It Was Okay", "😐 यह ठीक था"),
+              sub: t("Room for improvement", "सुधार की गुंजाइश है"),
+            },
+            4: {
+              main: t("😊 Good Experience", "😊 अच्छा अनुभव"),
+              sub: t("Glad you enjoyed it!", "खुशी है कि आपको पसंद आया!"),
+            },
+            5: {
+              main: t("🌟 Excellent!", "🌟 उत्कृष्ट!"),
+              sub: t("Absolutely amazing experience!", "बिल्कुल अद्भुत अनुभव!"),
+            },
           };
           ratingLabel.textContent = labels[value].main;
           ratingLabel.style.color = value >= 4 ? "#10b981" : value >= 3 ? "#f59e0b" : "#ef4444";
           ratingSubtext.textContent = labels[value].sub;
-        }
-
-        function triggerHapticFeedback() {
-          if (navigator.vibrate) {
-            navigator.vibrate(10);
-          }
         }
 
         // Star interactions
@@ -476,7 +392,7 @@ export default function OrderList({ element, orderStatus }) {
             slider.value = value;
             updateStars(value);
             updateLabels(value);
-            triggerHapticFeedback();
+            if (navigator.vibrate) navigator.vibrate(10);
           });
 
           star.addEventListener("mouseenter", () => {
@@ -529,7 +445,7 @@ export default function OrderList({ element, orderStatus }) {
           }
         });
 
-        // Focus/Blur handlers for textarea
+        // Focus/Blur handlers
         reviewText.addEventListener("focus", () => {
           reviewText.style.borderColor = "#7c3aed";
           reviewText.style.background = "white";
@@ -564,18 +480,15 @@ export default function OrderList({ element, orderStatus }) {
           });
         });
 
-        // Initialize with default
+        // Initialize
         updateStars(3);
         updateLabels(3);
       },
-
       preConfirm: () => {
         const ratingElement = document.getElementById("swal-rating");
         const reviewElement = document.getElementById("swal-review");
-        console.log("preConfirm called");
-        if (!ratingElement) {
-          return false;
-        }
+
+        if (!ratingElement) return false;
 
         const rating = parseInt(ratingElement.value || "0");
         const review = reviewElement?.value?.trim() || "";
@@ -583,8 +496,8 @@ export default function OrderList({ element, orderStatus }) {
         if (rating < 1 || rating > 5) {
           Swal.showValidationMessage({
             icon: "error",
-            title: "Invalid Rating",
-            text: "Please select a rating between 1 and 5",
+            title: t("Invalid Rating", "अमान्य रेटिंग"),
+            text: t("Please select a rating between 1 and 5", "कृपया 1 से 5 के बीच रेटिंग चुनें"),
           });
           return false;
         }
@@ -593,179 +506,105 @@ export default function OrderList({ element, orderStatus }) {
       },
     });
 
-    // ✅ Check if user cancelled or dismissed
     if (!result.isConfirmed) {
-      // User clicked Cancel, pressed ESC, or closed the popup
       setIsLoadingRating(false);
       return;
     }
 
-    // console.log("Reached after isConfirmed check");
-    // ✅ User confirmed - get the values
     const formValues = result.value;
-
     if (!formValues) {
       setIsLoadingRating(false);
       return;
     }
 
-    // ✅ Start the submission process
     setIsLoadingRating(true);
+
     // Show loading state
     Swal.fire({
-      title: "Submitting Your Review",
+      title: t("Submitting Your Review", "आपकी समीक्षा सबमिट हो रही है"),
       html: `
-      <div style="padding: 20px 0; text-align: center;">
-        <div style="font-size: 14px; color: #6b7280; margin-top: 4px;">Please wait while we process your feedback</div>
-        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 8px;">
-          <div style="width: 12px; height: 12px; background: #7c3aed; border-radius: 50%; animation: pulse 1.4s infinite ease-in-out both; animation-delay: 0s;"></div>
-          <div style="width: 12px; height: 12px; background: #7c3aed; border-radius: 50%; animation: pulse 1.4s infinite ease-in-out both; animation-delay: 0.2s;"></div>
-          <div style="width: 12px; height: 12px; background: #7c3aed; border-radius: 50%; animation: pulse 1.4s infinite ease-in-out both; animation-delay: 0.4s;"></div>
+        <div style="padding: 20px 0; text-align: center;">
+          <div style="font-size: 14px; color: #6b7280; margin-top: 4px;">
+            ${t("Please wait while we process your feedback", "कृपया प्रतीक्षा करें जब हम आपकी प्रतिक्रिया संसाधित कर रहे हैं")}
+          </div>
+          <div style="margin-top: 20px; display: flex; justify-content: center; gap: 8px;">
+            <div style="width: 12px; height: 12px; background: #7c3aed; border-radius: 50%; animation: pulse 1.4s infinite ease-in-out both; animation-delay: 0s;"></div>
+            <div style="width: 12px; height: 12px; background: #7c3aed; border-radius: 50%; animation: pulse 1.4s infinite ease-in-out both; animation-delay: 0.2s;"></div>
+            <div style="width: 12px; height: 12px; background: #7c3aed; border-radius: 50%; animation: pulse 1.4s infinite ease-in-out both; animation-delay: 0.4s;"></div>
+          </div>
+          <style>
+            @keyframes pulse {
+              0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+              40% { transform: scale(1); opacity: 1; }
+            }
+          </style>
         </div>
-        <style>
-          @keyframes pulse {
-            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-            40% { transform: scale(1); opacity: 1; }
-          }
-        </style>
-      </div>
-    `,
+      `,
       showConfirmButton: false,
       allowOutsideClick: false,
-      background: "#ffffff",
-      backdrop: "rgba(0,0,0,0.6) blur(8px)",
-      width: 400,
-      padding: "30px",
-      customClass: {
-        popup: "rounded-3xl",
-      },
     });
 
     try {
-      // Determine endpoint based on category
       const endpoint =
         category === "user" ? `${SERVER_URL}/bookings/ratingU` : `${SERVER_URL}/bookings/ratingV`;
 
-      // Send the review data
-      const response = await axios.patch(
+      await axios.patch(
         endpoint,
         {
           bookingId,
           rating: formValues.rating,
           review: formValues.review || "",
         },
-        {
-          headers: { Authorization: token },
-        },
+        { headers: { Authorization: token } },
       );
 
-      // Close loading popup
       Swal.close();
-
-      // ✅ Update success message
-      // setSuccess(response.data.message);
-      // setTimeout(() => {
-      //   setSuccess("");
-      // }, 1000);
-
-      // ✅ Update UI state
       dispatch(setCancelOrder(!cancelOrder));
       setIsLoadingRating(false);
 
-      // ✅ Show success popup
       const ratingStars = "⭐".repeat(formValues.rating) + "☆".repeat(5 - formValues.rating);
 
       await Swal.fire({
         title: "",
         html: `
-        <div style="text-align: center; padding: 10px 0;">
-          <div style="font-size: 64px; margin-bottom: 8px;">🎉</div>
-          <div style="font-size: 24px; font-weight: 700; color: #1f2937; margin-bottom: 4px;">
-            Thank You!
-          </div>
-          <div style="font-size: 42px; margin: 12px 0;">
-            ${ratingStars}
-          </div>
-          <div style="font-size: 16px; color: #6b7280;">
-            Your ${formValues.rating}-star review has been submitted
-          </div>
-          ${
-            formValues.review
-              ? `
-            <div style="margin-top: 16px; padding: 12px 16px; background: #f3f4f6; border-radius: 12px; text-align: left; font-size: 14px; color: #374151; font-style: italic;">
-              "${formValues.review}"
+          <div style="text-align: center; padding: 10px 0;">
+            <div style="font-size: 64px; margin-bottom: 8px;">🎉</div>
+            <div style="font-size: 24px; font-weight: 700; color: #1f2937; margin-bottom: 4px;">
+              ${t("Thank You!", "धन्यवाद!")}
             </div>
-          `
-              : ""
-          }
-          <div style="margin-top: 12px; font-size: 13px; color: #10b981; font-weight: 600;">
-            ✓ Feedback submitted successfully
+            <div style="font-size: 42px; margin: 12px 0;">
+              ${ratingStars}
+            </div>
+            <div style="font-size: 16px; color: #6b7280;">
+              ${t("Your", "आपकी")} ${formValues.rating}-star ${t("review has been submitted", "समीक्षा सबमिट कर दी गई है")}
+            </div>
+            ${
+              formValues.review
+                ? `
+              <div style="margin-top: 16px; padding: 12px 16px; background: #f3f4f6; border-radius: 12px; text-align: left; font-size: 14px; color: #374151; font-style: italic;">
+                "${formValues.review}"
+              </div>
+            `
+                : ""
+            }
+            <div style="margin-top: 12px; font-size: 13px; color: #10b981; font-weight: 600;">
+              ✓ ${t("Feedback submitted successfully", "प्रतिक्रिया सफलतापूर्वक सबमिट की गई")}
+            </div>
           </div>
-        </div>
-      `,
+        `,
         icon: "success",
         confirmButtonColor: "#7c3aed",
-        confirmButtonText: "✨ Awesome!",
-        background: "#ffffff",
-        backdrop: "rgba(0,0,0,0.6) blur(8px)",
+        confirmButtonText: "✨ " + t("Awesome!", "बहुत बढ़िया!"),
         timer: 4000,
         timerProgressBar: true,
-        showClass: {
-          popup: "animate__animated animate__tada",
-        },
-        width: 480,
-        padding: "30px",
-        customClass: {
-          popup: "rounded-3xl",
-          confirmButton:
-            "font-semibold px-8 py-3 rounded-xl transition-all duration-300 hover:scale-105",
-        },
       });
     } catch (error) {
-      // Close loading popup
       Swal.close();
-
-      // ✅ Update error message
-      setErr(error.response?.data?.message || "Failed to submit rating");
-      setTimeout(() => {
-        setErr("");
-      }, 3000);
-
+      setErr(
+        error.response?.data?.message || t("Failed to submit rating", "रेटिंग सबमिट करने में विफल"),
+      );
+      setTimeout(() => setErr(""), 3000);
       setIsLoadingRating(false);
-
-      // ✅ Show error popup
-      // await Swal.fire({
-      //   title: "",
-      //   html: `
-      //   <div style="text-align: center; padding: 10px 0;">
-      //     <div style="font-size: 64px; margin-bottom: 8px;">😅</div>
-      //     <div style="font-size: 22px; font-weight: 700; color: #1f2937; margin-bottom: 4px;">
-      //       Oops! Something Went Wrong
-      //     </div>
-      //     <div style="font-size: 15px; color: #6b7280; margin-bottom: 8px;">
-      //       ${error.response?.data?.message || "Please check your connection and try again"}
-      //     </div>
-      //     <div style="font-size: 13px; color: #ef4444; background: #fef2f2; padding: 8px 12px; border-radius: 8px; margin-top: 8px;">
-      //       🔄 You can try submitting again
-      //     </div>
-      //   </div>
-      // `,
-      //   icon: "error",
-      //   confirmButtonColor: "#7c3aed",
-      //   confirmButtonText: "Got it",
-      //   background: "#ffffff",
-      //   backdrop: "rgba(0,0,0,0.6) blur(8px)",
-      //   showClass: {
-      //     popup: "animate__animated animate__headShake",
-      //   },
-      //   width: 440,
-      //   padding: "30px",
-      //   customClass: {
-      //     popup: "rounded-3xl",
-      //     confirmButton:
-      //       "font-semibold px-8 py-3 rounded-xl transition-all duration-300 hover:scale-105",
-      //   },
-      // });
     }
   }
 
@@ -777,113 +616,115 @@ export default function OrderList({ element, orderStatus }) {
     if (err) showError(err);
   }, [err]);
 
+  // Get status colors
+  const getStatusColor = () => {
+    if (orderStatus === "complete") return "#16a34a";
+    if (orderStatus === "cancel") return "#dc2626";
+    return "#2563eb";
+  };
+
+  const getStatusLabel = () => {
+    if (orderStatus === "complete") return t("Completed", "पूर्ण");
+    if (orderStatus === "cancel") return t("Canceled", "रद्द");
+    return t("Pending", "लंबित");
+  };
+
   return (
-    <div
-      className="views-children"
-      key={element.key}
-      style={{
-        border:
-          orderStatus == "complete"
-            ? "2px solid green"
-            : orderStatus == "cancel"
-              ? "2px solid red"
-              : "2px solid blue",
-      }}
-    >
-      <div>
-        <span>Name :</span>{" "}
-        <span>
-          <CamleCase element={element.name} />
+    <div className="order-list-modern" style={{ borderColor: getStatusColor() }}>
+      <div className="order-list-header">
+        <div className="order-list-status">
+          <span className={`status-dot ${orderStatus}`}></span>
+          <span className="status-label" style={{ color: getStatusColor() }}>
+            {getStatusLabel()}
+          </span>
+        </div>
+        <span className="order-list-date">
+          {new Date(element.date).toLocaleDateString(lang === "hin" ? "hi-IN" : "en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })}
         </span>
-      </div>
-      <div>
-        <span>Phone No :</span> <span>{element.phoneNo}</span>
-      </div>
-      <div>
-        <span>Type :</span>
-        <span>
-          <CamleCase element={element.type} />
-        </span>
-      </div>
-      <div>
-        <span>Date :</span>
-        <span>{new Date(element.date).toDateString()}</span>
-      </div>
-      <div style={{ gap: "1rem" }}>
-        {orderStatus == "pending" ? (
-          <button
-            className="btn"
-            style={{
-              padding: isLoadingCancelOrder ? "0" : "",
-              backgroundColor: "red",
-            }}
-            onClick={() => handleCancelOrder(element.bookingId)}
-          >
-            {isLoadingCancelOrder ? <div className="loading"></div> : "Cancel Order"}
-          </button>
-        ) : (
-          ""
-        )}
-        {orderStatus == "pending" ? (
-          <button
-            className="btn"
-            style={{
-              padding: isLoadingCompleteOrder ? "0" : "",
-            }}
-            onClick={() => handleCompletedOrder(element.bookingId)}
-          >
-            {isLoadingCompleteOrder ? <div className="loading"></div> : "Mark As Complete"}
-          </button>
-        ) : (
-          ""
-        )}
       </div>
 
-      {orderStatus == "complete" ? (
-        <>
+      <div className="order-list-body">
+        <div className="order-list-field">
+          <span className="field-label">{t("Name", "नाम")}:</span>
+          <span className="field-value">
+            <CamleCase element={element.name} />
+          </span>
+        </div>
+
+        <div className="order-list-field">
+          <span className="field-label">{t("Phone", "फोन")}:</span>
+          <span className="field-value">{element.phoneNo}</span>
+        </div>
+
+        <div className="order-list-field">
+          <span className="field-label">{t("Service", "सेवा")}:</span>
+          <span className="field-value">
+            <CamleCase element={element.type} />
+          </span>
+        </div>
+      </div>
+
+      {orderStatus === "pending" && (
+        <div className="order-list-actions">
           <button
-            className="btn"
-            style={{
-              backgroundColor: element.rating ? "#fff" : "green",
-              color: element.rating ? "blue" : "",
-              padding: isLoadingRating ? "0" : "",
-            }}
-            onClick={() => handleRatings(element.bookingId, element.rating)}
+            className="action-btn cancel-btn"
+            onClick={() => handleCancelOrder(element.bookingId)}
+            disabled={isLoadingCancelOrder}
           >
-            {isLoadingRating ? (
-              <div className="loading"></div>
-            ) : element.rating ? (
-              <p
-                style={{
-                  fontSize: "1.3rem",
-                  color: "green",
-                }}
-              >
-                <span style={{ color: "brown" }}>Rated By You :</span> {element.rating}/5
-              </p>
+            {isLoadingCancelOrder ? (
+              <span className="btn-spinner"></span>
             ) : (
-              "Give Rating And Review To Vendor"
+              t("Cancel Order", "ऑर्डर रद्द करें")
             )}
           </button>
-          <p
-            style={{
-              fontSize: "1.3rem",
-              color: "green",
-              padding: "0.5rem",
-              borderRadius: "0.5rem",
-            }}
+
+          <button
+            className="action-btn complete-btn"
+            onClick={() => handleCompletedOrder(element.bookingId)}
+            disabled={isLoadingCompleteOrder}
           >
-            {element.review ? (
-              <>
-                <span style={{ color: "brown" }}>Reviewed By You :</span> {element.review}
-              </>
+            {isLoadingCompleteOrder ? (
+              <span className="btn-spinner"></span>
             ) : (
-              ""
+              t("Mark As Complete", "पूर्ण चिह्नित करें")
             )}
-          </p>
-        </>
-      ) : (
-        ""
+          </button>
+        </div>
+      )}
+
+      {orderStatus === "complete" && (
+        <div className="order-list-rating">
+          <button
+            className={`rating-btn ${element.rating ? "rated" : ""}`}
+            onClick={() => handleRatings(element.bookingId, element.rating)}
+            disabled={isLoadingRating}
+          >
+            {isLoadingRating ? (
+              <span className="btn-spinner"></span>
+            ) : element.rating ? (
+              <span className="rating-display">
+                <span className="rating-label">{t("Rated By You", "आपकी रेटिंग")}:</span>
+                <span className="rating-stars">
+                  {"⭐".repeat(element.rating)}
+                  <span className="rating-number">{element.rating}/5</span>
+                </span>
+              </span>
+            ) : (
+              t("Give Rating & Review", "रेटिंग और समीक्षा दें")
+            )}
+          </button>
+
+          {element.review && (
+            <div className="review-display">
+              <span className="review-label">{t("Your Review", "आपकी समीक्षा")}:</span>
+              <span className="review-text">“{element.review}”</span>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

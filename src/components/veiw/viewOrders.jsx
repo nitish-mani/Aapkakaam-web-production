@@ -1,8 +1,10 @@
+// Modern View Orders Page - AapkaKaam
+
 import "./view.css";
 
 import cross from "../../resources/svg/multiply-svgrepo-com.svg";
 import { useNavigate } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { SERVER_URL } from "../../utils/base";
 import { useSelector } from "react-redux";
@@ -10,10 +12,15 @@ import OrderList from "../orderList/orderList";
 import AdsterraBanner_320x50 from "../../ads/adsterraInFrameBanner";
 import AdsterraBanner from "../../ads/adsterraNativeBanner";
 import { showError } from "../showAlert";
+
 export default function ViewOrders() {
   const category = localStorage.getItem("category");
-
   const navigate = useNavigate();
+  const containerRef = useRef(null);
+
+  // Get language from Redux store
+  const lang = useSelector((store) => store.category?.selectLanguage || "en");
+
   const userData =
     category === "user"
       ? useSelector((store) => store.user.data)
@@ -39,10 +46,22 @@ export default function ViewOrders() {
   const completeVendorData = [];
   const cancelVendorData = [];
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "instant",
+    });
+
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
+    }
+  }, []);
+
   useEffect(() => {
     if (!navigator.onLine) {
       setIsLoading(false);
-      setErr("You are offline");
+      setErr(lang === "hin" ? "आप ऑफलाइन हैं" : "You are offline");
       setTimeout(() => {
         setErr("");
       }, 3000);
@@ -60,7 +79,10 @@ export default function ViewOrders() {
           setIsLoading(false);
         })
         .catch((err) => {
-          showError(err.response.data.message);
+          showError(
+            err.response?.data?.message ||
+              (lang === "hin" ? "ऑर्डर लोड करने में विफल" : "Failed to load orders"),
+          );
           setIsLoading(false);
           setTimeout(() => {
             setErr("");
@@ -78,14 +100,17 @@ export default function ViewOrders() {
           setIsLoading(false);
         })
         .catch((err) => {
-          showError(err.response.data.message);
+          showError(
+            err.response?.data?.message ||
+              (lang === "hin" ? "ऑर्डर लोड करने में विफल" : "Failed to load orders"),
+          );
           setIsLoading(false);
           setTimeout(() => {
             setErr("");
           }, 3000);
         });
     }
-  }, [cancelOrder, pageNo]);
+  }, [cancelOrder, pageNo, lang]);
 
   function handleOrdersView() {
     orders.forEach((data) => {
@@ -100,7 +125,7 @@ export default function ViewOrders() {
   }
   handleOrdersView();
 
-  function hanldeCrossInOrders() {
+  function handleCrossInOrders() {
     navigate("/");
   }
 
@@ -118,180 +143,209 @@ export default function ViewOrders() {
     }
   }
 
+  // Get status label based on language
+  const getStatusLabel = (status) => {
+    const labels = {
+      pending: lang === "hin" ? "लंबित" : "Pending",
+      complete: lang === "hin" ? "पूर्ण" : "Completed",
+      cancel: lang === "hin" ? "रद्द" : "Canceled",
+    };
+    return labels[status] || status;
+  };
+
+  // Get status color
+  const getStatusColor = (status) => {
+    const colors = {
+      pending: "#2563eb",
+      complete: "#16a34a",
+      cancel: "#dc2626",
+    };
+    return colors[status] || "#64748b";
+  };
+
   return (
     <>
       <AdsterraBanner_320x50 />
-      <div className="views-P">
-        <img
-          className="profile__close-button"
-          src={cross}
-          alt="cross"
-          onClick={hanldeCrossInOrders}
-        />
-        <h1
-          style={{
-            gridColumnEnd: "4",
-            gridColumnStart: "1",
-            marginBottom: "2rem",
-            paddingBottom: "1.5rem",
-            borderBottom: "1px solid rgba(105, 102, 102, 0.637)",
-          }}
-        >
-          Orders
-        </h1>
-        <div className="views">
-          <div id="views_child">
-            <div
-              style={{
-                border: orderStatus != "pending" ? "3px solid #fff" : "3px solid black",
-                padding: ".3rem",
-                borderRadius: "5px",
-              }}
+      <div className="orders-modern" ref={containerRef}>
+        <div className="orders-container-modern">
+          {/* Close Button */}
+          <button className="orders-close-btn" onClick={handleCrossInOrders}>
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M18 6L6 18M6 6l12 12"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+
+          {/* Header */}
+          <div className="orders-header-modern">
+            <div className="orders-header-left">
+              <div className="header-icon-wrapper">
+                <span className="header-icon">📋</span>
+              </div>
+              <div>
+                <h1>{lang === "hin" ? "मेरे ऑर्डर" : "My Orders"}</h1>
+                <p>
+                  {lang === "hin"
+                    ? "अपने सभी ऑर्डर देखें और प्रबंधित करें"
+                    : "View and manage all your orders"}
+                </p>
+              </div>
+            </div>
+            <span className="orders-total">
+              {orders.length} {lang === "hin" ? "ऑर्डर" : "orders"}
+            </span>
+          </div>
+
+          {/* Status Tabs */}
+          <div className="orders-tabs-modern">
+            <button
+              className={`tab-btn ${orderStatus === "pending" ? "active" : ""}`}
               onClick={() => setOrderStatus("pending")}
+              style={{ "--tab-color": "#2563eb" }}
             >
-              {" "}
-              <button
-                className="btn"
-                style={{
-                  backgroundColor: "blue",
-                }}
-              >
-                Pending
-              </button>
-            </div>
+              <span className="tab-dot pending"></span>
+              {lang === "hin" ? "लंबित" : "Pending"}
+              <span className="tab-count">{pendingVendorData.length}</span>
+            </button>
 
-            <div
-              style={{
-                border: orderStatus != "complete" ? "3px solid #fff" : "3px solid black",
-                padding: ".3rem",
-                borderRadius: "5px",
-              }}
+            <button
+              className={`tab-btn ${orderStatus === "complete" ? "active" : ""}`}
               onClick={() => setOrderStatus("complete")}
+              style={{ "--tab-color": "#16a34a" }}
             >
-              {" "}
-              <button
-                className="btn"
-                style={{
-                  backgroundColor: "green",
-                }}
-              >
-                Completed
-              </button>
-            </div>
+              <span className="tab-dot complete"></span>
+              {lang === "hin" ? "पूर्ण" : "Completed"}
+              <span className="tab-count">{completeVendorData.length}</span>
+            </button>
 
-            <div
-              style={{
-                border: orderStatus != "cancel" ? "3px solid #fff" : "3px solid black",
-                padding: ".3rem",
-                borderRadius: "5px",
-              }}
+            <button
+              className={`tab-btn ${orderStatus === "cancel" ? "active" : ""}`}
               onClick={() => setOrderStatus("cancel")}
+              style={{ "--tab-color": "#dc2626" }}
             >
-              <button
-                className="btn"
-                style={{
-                  backgroundColor: "red",
-                }}
-              >
-                Canceled
-              </button>
-            </div>
+              <span className="tab-dot cancel"></span>
+              {lang === "hin" ? "रद्द" : "Canceled"}
+              <span className="tab-count">{cancelVendorData.length}</span>
+            </button>
           </div>
 
-          {isLoading ? (
-            <div
-              style={{
-                width: "100vw",
-                height: "40rem",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {" "}
-              <div className="loading" style={{ width: "3rem", height: "3rem" }}></div>
+          {/* Orders List */}
+          <div className="orders-list-modern">
+            {isLoading ? (
+              <div className="orders-loading-modern">
+                <div className="loading-spinner-modern"></div>
+                <p>{lang === "hin" ? "ऑर्डर लोड हो रहे हैं..." : "Loading orders..."}</p>
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="orders-empty-modern">
+                <span className="empty-icon">📦</span>
+                <h3>{lang === "hin" ? "अभी तक कोई ऑर्डर नहीं" : "No orders yet"}</h3>
+                <p>
+                  {lang === "hin"
+                    ? "जब आप ऑर्डर करेंगे, यहाँ दिखाई देंगे"
+                    : "When you place an order, it will appear here"}
+                </p>
+              </div>
+            ) : pendingVendorData.length !== 0 ||
+              completeVendorData.length !== 0 ||
+              cancelVendorData.length !== 0 ? (
+              <>
+                {orderStatus === "pending" && pendingVendorData.length !== 0 ? (
+                  pendingVendorData?.map((element, i) => {
+                    return (
+                      <OrderList element={element} key={i} orderStatus={orderStatus} lang={lang} />
+                    );
+                  })
+                ) : orderStatus === "pending" ? (
+                  <div className="orders-empty-modern small">
+                    <span className="empty-icon">📭</span>
+                    <p>{lang === "hin" ? "कोई लंबित ऑर्डर नहीं" : "No pending orders"}</p>
+                  </div>
+                ) : (
+                  ""
+                )}
+                {orderStatus === "complete" && completeVendorData.length !== 0 ? (
+                  completeVendorData?.map((element, i) => {
+                    return (
+                      <OrderList element={element} key={i} orderStatus={orderStatus} lang={lang} />
+                    );
+                  })
+                ) : orderStatus === "complete" ? (
+                  <div className="orders-empty-modern small">
+                    <span className="empty-icon">✅</span>
+                    <p>{lang === "hin" ? "कोई पूर्ण ऑर्डर नहीं" : "No completed orders"}</p>
+                  </div>
+                ) : (
+                  ""
+                )}
+                {orderStatus === "cancel" && cancelVendorData.length !== 0 ? (
+                  cancelVendorData?.map((element, i) => {
+                    return (
+                      <OrderList element={element} key={i} orderStatus={orderStatus} lang={lang} />
+                    );
+                  })
+                ) : orderStatus === "cancel" ? (
+                  <div className="orders-empty-modern small">
+                    <span className="empty-icon">❌</span>
+                    <p>{lang === "hin" ? "कोई रद्द ऑर्डर नहीं" : "No canceled orders"}</p>
+                  </div>
+                ) : (
+                  ""
+                )}
+              </>
+            ) : (
+              ""
+            )}
+          </div>
+
+          {/* Pagination */}
+          {orders.length > 0 && (
+            <div className="orders-pagination-modern">
+              <button
+                className={`pagination-btn ${pageNo <= 1 ? "disabled" : ""}`}
+                onClick={handlePrev}
+                disabled={pageNo <= 1}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+                {lang === "hin" ? "पिछला" : "Prev"}
+              </button>
+
+              <span className="pagination-page">
+                {pageNo} / {totalPage}
+              </span>
+
+              <button
+                className={`pagination-btn ${pageNo >= totalPage ? "disabled" : ""}`}
+                onClick={handleNext}
+                disabled={pageNo >= totalPage}
+              >
+                {lang === "hin" ? "अगला" : "Next"}
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
             </div>
-          ) : orders.length === 0 ? (
-            <h1
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              You haven't Ordered Yet !
-            </h1>
-          ) : pendingVendorData.length != 0 ||
-            completeVendorData.length != 0 ||
-            cancelVendorData.length != 0 ? (
-            <>
-              {orderStatus == "pending" && pendingVendorData.length != 0 ? (
-                pendingVendorData?.map((element, i) => {
-                  return <OrderList element={element} key={i} orderStatus={orderStatus} />;
-                })
-              ) : orderStatus == "pending" ? (
-                <div style={{ margin: "5rem auto" }}>You don't have any pending Order</div>
-              ) : (
-                ""
-              )}
-              {orderStatus == "complete" && completeVendorData.length != 0 ? (
-                completeVendorData?.map((element, i) => {
-                  return <OrderList element={element} key={i} orderStatus={orderStatus} />;
-                })
-              ) : orderStatus == "complete" ? (
-                <div style={{ margin: "5rem auto" }}>You don't have any completed Order</div>
-              ) : (
-                ""
-              )}{" "}
-              {orderStatus == "cancel" && cancelVendorData.length != 0 ? (
-                cancelVendorData?.map((element, i) => {
-                  return <OrderList element={element} key={i} orderStatus={orderStatus} />;
-                })
-              ) : orderStatus == "cancel" ? (
-                <div style={{ margin: "5rem auto" }}>You don't have any canceled Order</div>
-              ) : (
-                ""
-              )}
-            </>
-          ) : (
-            ""
           )}
-        </div>
-        <div className="pageHandler">
-          <div
-            className="verify-btn"
-            style={{
-              width: "fit-content",
-              opacity: pageNo > 1 ? "1" : ".5",
-              cursor: pageNo > 1 ? "pointer" : "not-allowed",
-            }}
-            onClick={handlePrev}
-          >
-            Prev
-          </div>
-          <div
-            style={{
-              width: "2rem",
-              backgroundColor: "blue",
-              textAlign: "center",
-              color: "#fff",
-              padding: ".2rem",
-              borderRadius: "5px",
-            }}
-          >
-            {pageNo}
-          </div>
-          <div
-            className="verify-btn"
-            style={{
-              width: "fit-content",
-              opacity: totalPage > pageNo ? "1" : ".5",
-              cursor: totalPage > pageNo ? "pointer" : "not-allowed",
-            }}
-            onClick={handleNext}
-          >
-            Next
-          </div>
         </div>
       </div>
       <AdsterraBanner />

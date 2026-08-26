@@ -1,113 +1,654 @@
-/* calendar.css */
+/* ============================================================
+   CALENDAR
+   ============================================================ */
+
 .calendar {
-  font-family: Arial, sans-serif;
-  max-width: 400px;
-  /* margin: 8rem auto; */
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 16px;
+
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 20px;
+
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+
+  box-shadow:
+    0 10px 30px rgba(15, 23, 42, 0.08),
+    0 2px 8px rgba(15, 23, 42, 0.04);
+
+  box-sizing: border-box;
 }
+
+/* ============================================================
+   HEADER
+   ============================================================ */
 
 .calendar__header {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+
+  grid-template-columns:
+    42px
+    42px
+    1fr
+    42px
+    42px;
+
   align-items: center;
-  padding: 10px;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #ddd;
+
+  gap: 6px;
+
+  margin-bottom: 18px;
+  padding: 6px;
+
+  border-radius: 14px;
+
+  background: #f1f5f9;
 }
 
-.calendar__header > div {
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+
+.calendar__nav {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 12px;
+
+  background: transparent;
+  color: #334155;
+
+  font-size: 25px;
+  font-weight: 600;
+
   cursor: pointer;
-  padding: 5px 10px;
-  user-select: none;
+
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
-.calendar__header > div:hover {
-  background-color: #e9e9e9;
-  border-radius: 4px;
+.calendar__nav:hover:not(:disabled) {
+  background: #ffffff;
+  color: #0f172a;
+
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+
+  transform: translateY(-1px);
 }
 
-.year-month {
-  font-weight: bold;
-  flex-grow: 1;
+.calendar__nav:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.calendar__nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.calendar__nav--year {
+  font-size: 22px;
+}
+
+/* ============================================================
+   TITLE
+   ============================================================ */
+
+.calendar__title {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  color: #0f172a;
+
+  font-size: 16px;
+  font-weight: 700;
+
   text-align: center;
 }
+
+.calendar__month {
+  white-space: nowrap;
+}
+
+.calendar__year {
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* ============================================================
+   CALENDAR GRID
+   ============================================================ */
 
 .calendar__body {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
-  padding: 10px;
+
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+
+  gap: 6px;
+
+  width: 100%;
 }
 
-.calendar__body > div {
-  text-align: center;
-  padding: 8px 0;
+/* ============================================================
+   WEEKDAY
+   ============================================================ */
+
+.calendar__weekday {
+  min-height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #94a3b8;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
+
+/* ============================================================
+   DATE
+   ============================================================ */
 
 .date {
-  transition: all 0.2s ease;
-}
+  position: relative;
 
-.date:hover {
-  background-color: #f0f0f0;
-}
+  width: 100%;
+  aspect-ratio: 1 / 1;
 
-.isCurrentDay {
-  /* background-color: #007bff; */
-  border: 2px solid black;
-  /* color: white; */
-  font-weight: bold;
-}
+  min-width: 0;
 
-.isBooked {
-  background-color: #28a745;
-  color: white;
-}
-
-.isCanceled {
-  background-color: #dc3545;
-  color: white;
-}
-
-.isPending {
-  background-color: #007bff;
-  color: white;
-}
-
-.calendar__colorDetailing {
   display: flex;
-  justify-content: space-between;
-  padding: 10px;
-  border-top: 1px solid #ddd;
-  background-color: #f9f9f9;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 12px;
+
+  background: transparent;
+  color: #1e293b;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease;
 }
 
-.calendar__colorDetailing-1st,
-.calendar__colorDetailing-2nd {
+/* ============================================================
+   DATE HOVER
+   ============================================================ */
+
+.date:hover:not(:disabled) {
+  background: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+.date:active:not(:disabled) {
+  transform: scale(0.93);
+}
+
+/* ============================================================
+   OUTSIDE MONTH
+   ============================================================ */
+
+.date.isOutsideMonth {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ============================================================
+   PAST / BACK DATE
+
+   Intentionally very subtle so users focus on:
+   - Today
+   - Future dates
+   - Booking status
+   ============================================================ */
+
+.date.isPastDate {
+  color: #d7dee8;
+
+  background: transparent;
+
+  opacity: 0.38;
+
+  cursor: not-allowed;
+
+  box-shadow: none;
+
+  transform: none;
+
+  pointer-events: none;
+}
+
+/* Never brighten past dates */
+.date.isPastDate:hover,
+.date.isPastDate:active {
+  color: #d7dee8;
+
+  background: transparent;
+
+  opacity: 0.38;
+
+  transform: none;
+
+  box-shadow: none;
+}
+
+/* ============================================================
+   TODAY
+   ============================================================ */
+
+.date.isCurrentDay {
+  color: #0f172a;
+
+  box-shadow: inset 0 0 0 2px #0f172a;
+
+  opacity: 1;
+}
+
+.date.isCurrentDay:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+/* ============================================================
+   TODAY + PAST
+
+   Today should ALWAYS remain visible even if
+   calendar generation marks it incorrectly as past.
+   ============================================================ */
+
+.date.isCurrentDay.isPastDate {
+  color: #0f172a;
+
+  opacity: 1;
+
+  background: #ffffff;
+
+  box-shadow: inset 0 0 0 2px #0f172a;
+
+  pointer-events: auto;
+
+  cursor: pointer;
+}
+
+/* ============================================================
+   COMPLETED / BOOKED
+   GREEN
+   ============================================================ */
+
+.date.isBooked {
+  background: #dcfce7;
+
+  color: #15803d;
+
+  cursor: not-allowed;
+
+  opacity: 1;
+
+  box-shadow: inset 0 0 0 1px #bbf7d0;
+}
+
+.date.isBooked:hover {
+  background: #bbf7d0;
+
+  color: #166534;
+
+  transform: none;
+}
+
+/* ============================================================
+   CANCELED
+   RED
+   ============================================================ */
+
+.date.isCanceled {
+  background: #fee2e2;
+
+  color: #dc2626;
+
+  cursor: not-allowed;
+
+  opacity: 1;
+
+  box-shadow: inset 0 0 0 1px #fecaca;
+}
+
+.date.isCanceled:hover {
+  background: #fecaca;
+
+  color: #b91c1c;
+
+  transform: none;
+}
+
+/* ============================================================
+   PENDING
+   BLUE
+   ============================================================ */
+
+.date.isPending {
+  background: #dbeafe;
+
+  color: #1d4ed8;
+
+  cursor: not-allowed;
+
+  opacity: 1;
+
+  box-shadow: inset 0 0 0 1px #bfdbfe;
+}
+
+.date.isPending:hover {
+  background: #bfdbfe;
+
+  color: #1e40af;
+
+  transform: none;
+}
+
+/* ============================================================
+   STATUS DOT
+   ============================================================ */
+
+.date__statusDot {
+  position: absolute;
+
+  right: 6px;
+  top: 6px;
+
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: currentColor;
+}
+
+/* ============================================================
+   STATUS DOT COLORS
+   ============================================================ */
+
+.date.isBooked .date__statusDot {
+  background: #16a34a;
+}
+
+.date.isCanceled .date__statusDot {
+  background: #dc2626;
+}
+
+.date.isPending .date__statusDot {
+  background: #2563eb;
+}
+
+/* ============================================================
+   LEGEND
+   ============================================================ */
+
+.calendar__legend {
   display: flex;
-  gap: 15px;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-wrap: wrap;
+
+  gap: 16px;
+
+  margin-top: 18px;
+  padding-top: 14px;
+
+  border-top: 1px solid #e2e8f0;
+
+  color: #64748b;
+
+  font-size: 12px;
+  font-weight: 600;
 }
 
-.calendar__colorDetailing--today,
-.calendar__colorDetailing--booked,
-.calendar__colorDetailing--canceled,
-.calendar__colorDetailing--pending {
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
+.calendar__legendItem {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
 }
 
-.calendar__colorDetailing--booked {
-  background-color: #28a745;
+/* ============================================================
+   LEGEND DOT
+   ============================================================ */
+
+.calendar__legend-dot {
+  width: 10px;
+  height: 10px;
+
+  flex: 0 0 10px;
+
+  border-radius: 50%;
 }
 
-.calendar__colorDetailing--canceled {
-  background-color: #dc3545;
+/* ============================================================
+   TODAY LEGEND
+   ============================================================ */
+
+.calendar__legend-dot--today {
+  background: #ffffff;
+
+  box-shadow: inset 0 0 0 2px #0f172a;
 }
 
-.calendar__colorDetailing--pending {
-  background-color: #007bff;
+/* ============================================================
+   COMPLETED LEGEND
+   GREEN
+   ============================================================ */
+
+.calendar__legend-dot--booked {
+  background: #22c55e;
+}
+
+/* ============================================================
+   CANCELED LEGEND
+   RED
+   ============================================================ */
+
+.calendar__legend-dot--canceled {
+  background: #ef4444;
+}
+
+/* ============================================================
+   PENDING LEGEND
+   BLUE
+   ============================================================ */
+
+.calendar__legend-dot--pending {
+  background: #3b82f6;
+}
+
+/* ============================================================
+   FOCUS
+   ============================================================ */
+
+.calendar__nav:focus-visible,
+.date:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.35);
+
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 480px) {
+  .calendar {
+    padding: 12px;
+
+    border-radius: 16px;
+  }
+
+  .calendar__header {
+    grid-template-columns:
+      36px
+      36px
+      1fr
+      36px
+      36px;
+
+    gap: 4px;
+
+    margin-bottom: 14px;
+  }
+
+  .calendar__nav {
+    width: 36px;
+    height: 36px;
+
+    font-size: 22px;
+  }
+
+  .calendar__nav--year {
+    font-size: 19px;
+  }
+
+  .calendar__title {
+    font-size: 14px;
+  }
+
+  .calendar__body {
+    gap: 4px;
+  }
+
+  .calendar__weekday {
+    min-height: 28px;
+
+    font-size: 10px;
+  }
+
+  .date {
+    border-radius: 10px;
+
+    font-size: 13px;
+  }
+
+  .date__statusDot {
+    right: 4px;
+    top: 4px;
+
+    width: 4px;
+    height: 4px;
+  }
+
+  .calendar__legend {
+    gap: 12px;
+
+    margin-top: 14px;
+    padding-top: 12px;
+
+    font-size: 11px;
+  }
+
+  .calendar__legend-dot {
+    width: 9px;
+    height: 9px;
+
+    flex-basis: 9px;
+  }
+}
+
+/* ============================================================
+   VERY SMALL DEVICES
+   ============================================================ */
+
+@media (max-width: 360px) {
+  .calendar {
+    padding: 10px;
+  }
+
+  .calendar__header {
+    grid-template-columns:
+      32px
+      32px
+      1fr
+      32px
+      32px;
+
+    padding: 4px;
+  }
+
+  .calendar__nav {
+    width: 32px;
+    height: 32px;
+
+    font-size: 19px;
+  }
+
+  .calendar__nav--year {
+    font-size: 17px;
+  }
+
+  .calendar__title {
+    font-size: 13px;
+  }
+
+  .calendar__body {
+    gap: 3px;
+  }
+
+  .date {
+    border-radius: 8px;
+
+    font-size: 12px;
+  }
+
+  .calendar__legend {
+    gap: 9px;
+
+    font-size: 10px;
+  }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .calendar__nav,
+  .date {
+    transition: none;
+  }
+
+  .calendar__nav:hover:not(:disabled),
+  .date:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .date:active:not(:disabled),
+  .calendar__nav:active:not(:disabled) {
+    transform: none;
+  }
 }

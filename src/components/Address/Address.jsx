@@ -1,6 +1,6 @@
-// optimized and production ready
+// Modern Address Page - AapkaKaam (with scroll to top)
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import "./Address.css";
 import { useDispatch, useSelector } from "react-redux";
 import { addDataUser, clearDataUser } from "../../utils/userslice";
@@ -21,6 +21,10 @@ const Address = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const category = localStorage.getItem("category");
+  const containerRef = useRef(null);
+
+  // Get language from Redux store
+  const lang = useSelector((store) => store.category?.selectLanguage || "en");
 
   // Select user data based on category
   const userData = useSelector((store) =>
@@ -61,12 +65,29 @@ const Address = () => {
     return category === "user" ? userData[0]?.userId : userData[0]?.vendorId;
   }, [category, userData]);
 
+  // Scroll to top on mount
+  useEffect(() => {
+    // Scroll window to top
+    window.scrollTo({
+      top: 0,
+      behavior: "instant",
+    });
+
+    // Also scroll the container to top if it exists
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
+    }
+  }, []);
+
   // API call to fetch post office details
   const fetchPostOfficeDetails = useCallback(async () => {
     if (!isPincodeValid) return;
 
     if (!isOnline) {
-      setSuccess((prev) => ({ ...prev, err: "You are offline" }));
+      setSuccess((prev) => ({
+        ...prev,
+        err: lang === "hin" ? "आप ऑफलाइन हैं" : "You are offline",
+      }));
       setTimeout(() => setSuccess((prev) => ({ ...prev, err: "" })), 3000);
       return;
     }
@@ -86,19 +107,20 @@ const Address = () => {
           headers: { Authorization: token },
         },
       );
-      const result = response.data.data.offices;
 
-      console.log(response);
       if (response?.status === 200) {
         const result = response.data.data;
         const offices = result.offices || [];
 
         const cleanedOffices = offices.map((office) => ({
-          Name: office.officename.replace(/\s(BO|SO|HO)$/, "").toUpperCase(), // remove " BO" or " SO"
-          original: office, // optional: keep full data
+          Name: office.officename.replace(/\s(BO|SO|HO)$/, "").toUpperCase(),
+          original: office,
         }));
 
-        setPostOfficeDetails([{ Name: "Select Post Office" }, ...cleanedOffices]);
+        setPostOfficeDetails([
+          { Name: lang === "hin" ? "पोस्ट ऑफिस चुनें" : "Select Post Office" },
+          ...cleanedOffices,
+        ]);
 
         setFormData((prev) => ({
           ...prev,
@@ -106,31 +128,45 @@ const Address = () => {
           state: result.offices[0]?.statename || "",
         }));
       } else {
-        setSuccess((prev) => ({ ...prev, err: "Enter Valid Pincode" }));
+        setSuccess((prev) => ({
+          ...prev,
+          err: lang === "hin" ? "मान्य पिनकोड दर्ज करें" : "Enter Valid Pincode",
+        }));
       }
     } catch (error) {
-      setSuccess((prev) => ({ ...prev, err: "Enter Valid Pincode" }));
+      setSuccess((prev) => ({
+        ...prev,
+        err: lang === "hin" ? "मान्य पिनकोड दर्ज करें" : "Enter Valid Pincode",
+      }));
     } finally {
       setIsLoading((prev) => ({ ...prev, address: false }));
     }
-  }, [formData.pincode, isOnline, isPincodeValid]);
+  }, [formData.pincode, isOnline, isPincodeValid, category, token, lang]);
 
   // Handle form field changes
-  const handleChange = useCallback((field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    setSuccess((prev) => ({ ...prev, [field]: false, err: "" }));
+  const handleChange = useCallback(
+    (field, value) => {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+      setSuccess((prev) => ({ ...prev, [field]: false, err: "" }));
 
-    // Reset district and state when pincode changes
-    if (field === "pincode") {
-      setFormData((prev) => ({ ...prev, dist: "", state: "" }));
-      setPostOfficeDetails([{ Name: "Select Post Office" }]);
-    }
-  }, []);
+      // Reset district and state when pincode changes
+      if (field === "pincode") {
+        setFormData((prev) => ({ ...prev, dist: "", state: "" }));
+        setPostOfficeDetails([
+          { Name: lang === "hin" ? "पोस्ट ऑफिस चुनें" : "Select Post Office" },
+        ]);
+      }
+    },
+    [lang],
+  );
 
   // Handle form submission
   const handleSubmitAddress = useCallback(async () => {
     if (!isOnline) {
-      setSuccess((prev) => ({ ...prev, err: "You are offline" }));
+      setSuccess((prev) => ({
+        ...prev,
+        err: lang === "hin" ? "आप ऑफलाइन हैं" : "You are offline",
+      }));
       setTimeout(() => setSuccess((prev) => ({ ...prev, err: "" })), 3000);
       return;
     }
@@ -138,7 +174,10 @@ const Address = () => {
     // Validation
     const newErrors = {
       vill: viewOnLocation ? false : !formData.vill,
-      post: viewOnLocation ? false : !formData.post || formData.post === "Select Post Office",
+      post: viewOnLocation
+        ? false
+        : !formData.post ||
+          formData.post === (lang === "hin" ? "पोस्ट ऑफिस चुनें" : "Select Post Office"),
       pincode: !isPincodeValid,
       err: "",
     };
@@ -146,10 +185,16 @@ const Address = () => {
     if (newErrors.vill || newErrors.post || newErrors.pincode) {
       setSuccess(newErrors);
       newErrors.err = newErrors.vill
-        ? "Village Required"
+        ? lang === "hin"
+          ? "गाँव आवश्यक है"
+          : "Village Required"
         : newErrors.pincode
-          ? "Pincode Must Have 6 Characters"
-          : "Select Post Office";
+          ? lang === "hin"
+            ? "पिनकोड 6 अंकों का होना चाहिए"
+            : "Pincode Must Have 6 Characters"
+          : lang === "hin"
+            ? "पोस्ट ऑफिस चुनें"
+            : "Select Post Office";
       return;
     }
 
@@ -190,7 +235,9 @@ const Address = () => {
     } catch (error) {
       setSuccess((prev) => ({
         ...prev,
-        err: error.response?.data?.message || "An error occurred",
+        err:
+          error.response?.data?.message ||
+          (lang === "hin" ? "कोई त्रुटि हुई" : "An error occurred"),
       }));
     } finally {
       setIsLoading((prev) => ({ ...prev, submit: false }));
@@ -206,6 +253,7 @@ const Address = () => {
     userData,
     dispatch,
     navigate,
+    lang,
   ]);
 
   // Effects
@@ -236,86 +284,196 @@ const Address = () => {
     navigate("/");
   }, [dispatch, navigate]);
 
-  // Render functions
-  const renderInputField = (field, placeholder, type = "text", readOnly = false) => (
-    <input
-      placeholder={isLoading.address ? "Loading..." : placeholder}
-      type={type}
-      value={formData[field].toUpperCase()}
-      onChange={(e) => handleChange(field, e.target.value)}
-      style={{
-        border: errors[field] ? "2px solid red" : "",
-        textAlign: isLoading.address ? "center" : "left",
-      }}
-      readOnly={readOnly}
-    />
-  );
-
-  const renderPostOfficeSelect = () =>
-    postOfficeDetails.length !== 1 ? (
-      <select
-        className="post-select"
-        value={formData.post}
-        onChange={(e) => handleChange("post", e.target.value)}
-        style={{ border: errors.post ? "2px solid red" : "" }}
-      >
-        {postOfficeDetails.map((data, i) => (
-          <option key={i} value={data.Name}>
-            {data.Name}
-          </option>
-        ))}
-      </select>
-    ) : (
-      renderInputField("post", "Post", "text", true)
-    );
+  // Get title based on mode
+  const getTitle = () => {
+    if (viewOnLocation) {
+      return lang === "hin" ? "📍 स्थान चुनें" : "📍 Select Location";
+    }
+    return lang === "hin"
+      ? `${CamleCase({ element: category })} पता`
+      : `${CamleCase({ element: category })} Address`;
+  };
 
   return (
     <>
       <AdsterraBanner_320x50 />
-      <div className="address">
-        {/* Close button */}
-        <img
-          src={cross}
-          alt="close"
-          className="address__close-button"
-          onClick={handleCrossInAddress}
-        />
+      <div className="address-modern">
+        <div className="address-modern-container" ref={containerRef}>
+          {/* Decorative Elements */}
+          <div className="address-decoration">
+            <div className="deco-circle c1"></div>
+            <div className="deco-circle c2"></div>
+            <div className="deco-circle c3"></div>
+          </div>
 
-        {/* Header */}
-        <div className="address__header">
-          <h3>{viewOnLocation ? "Location" : `${CamleCase({ element: category })} Address`}</h3>
-        </div>
-        {/* Form fields */}
-        <div className="address__form">
-          {!viewOnLocation && <div>{renderInputField("vill", "Village")}</div>}
-
-          {renderInputField("pincode", "Enter Pincode", "number")}
-          <div>{renderPostOfficeSelect()}</div>
-          {renderInputField("dist", "District", "text", true)}
-          {renderInputField("state", "State", "text", true)}
-
-          <button
-            className="address__submit-button"
-            onClick={handleSubmitAddress}
-            disabled={!isFormValid || isLoading.submit}
-          >
-            {isLoading.submit ? <div className="loading"></div> : "Submit"}
+          {/* Close Button */}
+          <button className="address-close-btn" onClick={handleCrossInAddress}>
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M18 6L6 18M6 6l12 12"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+            </svg>
           </button>
 
-          {viewOnLocation && (
-            <p className="address__pick-from-address" onClick={resetLocation}>
-              Pick from Address
+          {/* Header */}
+          <div className="address-header">
+            <div className="address-badge">{lang === "hin" ? "📍 पता" : "📍 ADDRESS"}</div>
+            <h1>{getTitle()}</h1>
+            <p>
+              {lang === "hin"
+                ? "अपना पता दर्ज करें ताकि आसपास के प्रोफेशनल आपको ढूंढ सकें"
+                : "Enter your address so nearby professionals can find you"}
             </p>
-          )}
+          </div>
+
+          {/* Form */}
+          <div className="address-form">
+            {/* Village */}
+            {!viewOnLocation && (
+              <div className="form-group">
+                <label>{lang === "hin" ? "🏘️ गाँव" : "🏘️ Village"}</label>
+                <div className="input-wrapper">
+                  <input
+                    type="text"
+                    placeholder={lang === "hin" ? "गाँव का नाम दर्ज करें" : "Enter village name"}
+                    value={formData.vill.toUpperCase()}
+                    onChange={(e) => handleChange("vill", e.target.value)}
+                    className={errors.vill ? "error" : ""}
+                  />
+                  {errors.vill && (
+                    <span className="input-error">
+                      ⚠️ {lang === "hin" ? "गाँव आवश्यक है" : "Village required"}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Pincode */}
+            <div className="form-group">
+              <label>{lang === "hin" ? "📮 पिनकोड" : "📮 Pincode"}</label>
+              <div className="input-wrapper pincode-wrapper">
+                <input
+                  type="text"
+                  placeholder={
+                    lang === "hin" ? "6 अंकों का पिनकोड दर्ज करें" : "Enter 6-digit pincode"
+                  }
+                  value={formData.pincode}
+                  onChange={(e) => handleChange("pincode", e.target.value)}
+                  className={errors.pincode ? "error" : ""}
+                  maxLength="6"
+                />
+                {isLoading.address && <span className="loading-spinner"></span>}
+                {errors.pincode && (
+                  <span className="input-error">
+                    ⚠️ {lang === "hin" ? "6 अंकों का पिनकोड दर्ज करें" : "Enter 6-digit pincode"}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Post Office */}
+            <div className="form-group">
+              <label>{lang === "hin" ? "🏢 पोस्ट ऑफिस" : "🏢 Post Office"}</label>
+              <div className="input-wrapper">
+                {postOfficeDetails.length !== 1 ? (
+                  <select
+                    className="modern-select"
+                    value={formData.post}
+                    onChange={(e) => handleChange("post", e.target.value)}
+                    style={{ border: errors.post ? "2px solid #dc2626" : "" }}
+                  >
+                    {postOfficeDetails.map((data, i) => (
+                      <option key={i} value={data.Name}>
+                        {data.Name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    placeholder={lang === "hin" ? "पोस्ट ऑफिस" : "Post Office"}
+                    value={formData.post.toUpperCase()}
+                    onChange={(e) => handleChange("post", e.target.value)}
+                    className={errors.post ? "error" : ""}
+                  />
+                )}
+                {errors.post && (
+                  <span className="input-error">
+                    ⚠️ {lang === "hin" ? "पोस्ट ऑफिस चुनें" : "Select post office"}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* District */}
+            <div className="form-group">
+              <label>{lang === "hin" ? "🗺️ जिला" : "🗺️ District"}</label>
+              <div className="input-wrapper">
+                <input
+                  type="text"
+                  placeholder={lang === "hin" ? "जिला" : "District"}
+                  value={formData.dist.toUpperCase()}
+                  readOnly
+                  className="readonly"
+                />
+              </div>
+            </div>
+
+            {/* State */}
+            <div className="form-group">
+              <label>{lang === "hin" ? "🏛️ राज्य" : "🏛️ State"}</label>
+              <div className="input-wrapper">
+                <input
+                  type="text"
+                  placeholder={lang === "hin" ? "राज्य" : "State"}
+                  value={formData.state.toUpperCase()}
+                  readOnly
+                  className="readonly"
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              className="address-submit-btn"
+              onClick={handleSubmitAddress}
+              disabled={!isFormValid || isLoading.submit}
+            >
+              {isLoading.submit ? (
+                <span className="loader"></span>
+              ) : (
+                <span>
+                  {lang === "hin" ? "सबमिट करें" : "Submit"}
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </span>
+              )}
+            </button>
+
+            {/* Pick from Address */}
+            {viewOnLocation && (
+              <button className="address-pick-btn" onClick={resetLocation}>
+                {lang === "hin" ? "📌 पते से चुनें" : "📌 Pick from Address"}
+              </button>
+            )}
+          </div>
         </div>
       </div>
       <AdsterraBanner />
     </>
   );
-};
-
-Address.propTypes = {
-  // Add prop types if this component receives any props
 };
 
 export default Address;
