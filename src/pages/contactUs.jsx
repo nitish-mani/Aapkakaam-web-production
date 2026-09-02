@@ -334,7 +334,10 @@ Sent from AapkaKaam Contact Form
 
         {/* Footer */}
         <div className="contact-footer">
-          <span>© 2026 AapkaKaam • {t("All Rights Reserved", "सभी अधिकार सुरक्षित")}</span>
+          <span>
+            © {new Date().getFullYear()} Uslugi Technology Pvt. Ltd. •{" "}
+            {t("All Rights Reserved", "सभी अधिकार सुरक्षित")}
+          </span>
         </div>
       </div>
     </div>

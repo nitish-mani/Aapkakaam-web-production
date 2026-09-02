@@ -21,6 +21,12 @@ import AdsterraBanner_320x50 from "../../ads/adsterraInFrameBanner";
 import AdsterraBanner from "../../ads/adsterraNativeBanner";
 import Attendance from "../Attendance/attendance";
 import { showWarning } from "../showAlert";
+import serviceData from "../../data/serviceData";
+
+// Translation helper
+const t = (lang, en, hi) => {
+  return lang === "hin" ? hi : en;
+};
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -37,6 +43,94 @@ const Profile = () => {
   const lang = useSelector((store) => store.category?.selectLanguage || "en");
 
   const token = useMemo(() => `Bearer ${userData[0]?.token}`, [userData]);
+
+  // ✅ ADD THESE STATE VARIABLES
+  const [selectedJobForWage, setSelectedJobForWage] = useState("");
+  const [showCustomWageType, setShowCustomWageType] = useState(false);
+  const [customWageType, setCustomWageType] = useState("");
+
+  // Get all services for job type display
+  const allServices = useMemo(() => {
+    return serviceData.flatMap((category) =>
+      category.services.map((service) => ({
+        value: service.jobType,
+        label: service.title,
+        labelHindi: service.hindi || service.title,
+        category: category.heading,
+        headingHindi: category.headingHindi || category.heading,
+      })),
+    );
+  }, []);
+
+  // Get job display name with emoji
+  const getJobDisplay = useCallback(
+    (jobValue) => {
+      if (!jobValue) return t(lang, "Not set", "सेट नहीं");
+      const service = allServices.find((s) => s.value === jobValue);
+      if (service) {
+        return lang === "hin" ? service.labelHindi : service.label;
+      }
+      return jobValue;
+    },
+    [allServices, lang],
+  );
+
+  // Get category for a job
+  const getJobCategory = useCallback(
+    (jobValue) => {
+      if (!jobValue) return "";
+      const service = allServices.find((s) => s.value === jobValue);
+      return service ? service.category : "";
+    },
+    [allServices],
+  );
+
+  // Get emoji for job based on category
+  const getJobEmoji = useCallback(
+    (jobValue) => {
+      if (!jobValue) return "🔧";
+      const service = allServices.find((s) => s.value === jobValue);
+      if (!service) return "🔧";
+
+      const categoryEmojis = {
+        Construction: "🏗️",
+        Repair: "🔧",
+        Services: "🛠️",
+        Transport: "🚗",
+        Events: "🎉",
+        Household: "🏠",
+        Education: "📚",
+        Health: "💊",
+        Beauty: "💄",
+        Agriculture: "🌾",
+        Cleaning: "🧹",
+        Installation: "📡",
+      };
+
+      return categoryEmojis[service.category] || "🔧";
+    },
+    [allServices],
+  );
+
+  // Group jobs by category
+  const getGroupedJobs = useCallback(
+    (jobs) => {
+      if (!jobs || !Array.isArray(jobs) || jobs.length === 0) {
+        return {};
+      }
+
+      const groups = {};
+      jobs.forEach((job) => {
+        const category = getJobCategory(job) || t(lang, "Other", "अन्य");
+        if (!groups[category]) {
+          groups[category] = [];
+        }
+        groups[category].push(job);
+      });
+      return groups;
+    },
+    [getJobCategory, lang],
+  );
 
   // Scroll to top on mount
   useEffect(() => {
@@ -102,6 +196,10 @@ const Profile = () => {
       wageRate: false,
       wageRateType: false,
     });
+    // Reset custom wage type states
+    setShowCustomWageType(false);
+    setCustomWageType("");
+    setSelectedJobForWage("");
   }, [category, dispatch]);
 
   const showError = useCallback((message) => {
@@ -109,9 +207,18 @@ const Profile = () => {
     setTimeout(() => setErr(""), 1000);
   }, []);
 
-  const handleEditToggle = useCallback((field) => {
-    setEditStates((prev) => ({ ...prev, [field]: !prev[field] }));
-  }, []);
+  const handleEditToggle = useCallback(
+    (field) => {
+      setEditStates((prev) => ({ ...prev, [field]: !prev[field] }));
+      // Reset custom wage type states when canceling edit
+      if (field === "wageRate" && editStates.wageRate) {
+        setShowCustomWageType(false);
+        setCustomWageType("");
+        setSelectedJobForWage("");
+      }
+    },
+    [editStates.wageRate],
+  );
 
   const handleInputChange = useCallback((field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -120,7 +227,7 @@ const Profile = () => {
   // API call handlers
   const handleNameUpdate = useCallback(async () => {
     if (!navigator.onLine) {
-      showError(lang === "hin" ? "आप ऑफलाइन हैं" : "You are offline");
+      showError(t(lang, "You are offline", "आप ऑफलाइन हैं"));
       return;
     }
 
@@ -148,7 +255,7 @@ const Profile = () => {
       localStorage.setItem(category, JSON.stringify(updatedData));
       handleEditToggle("name");
     } catch (error) {
-      showError(error.response?.data?.message || "Something went wrong");
+      showError(error.response?.data?.message || t(lang, "Something went wrong", "कुछ गलत हो गया"));
     } finally {
       setIsLoading((prev) => ({ ...prev, name: false }));
     }
@@ -160,45 +267,160 @@ const Profile = () => {
 
   const handleWageRateUpdate = useCallback(async () => {
     if (!navigator.onLine) {
-      showError(lang === "hin" ? "आप ऑफलाइन हैं" : "You are offline");
+      showError(t(lang, "You are offline", "आप ऑफलाइन हैं"));
       return;
     }
-    setIsLoading((prev) => ({ ...prev, wageRate: true }));
-    setIsLoading((prev) => ({ ...prev, wageRateType: true }));
+
+    if (!selectedJobForWage) {
+      showError(t(lang, "Please select a job", "कृपया काम चुनें"));
+      return;
+    }
+
+    const rate = Number(formData.wageRate);
+
+    if (!Number.isFinite(rate) || rate < 0) {
+      showError(t(lang, "Please enter a valid wage rate", "कृपया सही मजदूरी दर दर्ज करें"));
+      return;
+    }
+
+    const rateType = String(formData.wageRateType || "").trim();
+
+    if (!rateType) {
+      showError(t(lang, "Please select a rate type", "कृपया दर का प्रकार चुनें"));
+      return;
+    }
+
+    setIsLoading((prev) => ({
+      ...prev,
+      wageRate: true,
+      wageRateType: true,
+    }));
 
     try {
+      const currentJobs = Array.isArray(userData[0]?.type)
+        ? [...userData[0].type]
+        : userData[0]?.type
+          ? [userData[0].type]
+          : [];
+
+      if (!currentJobs.length) {
+        throw new Error(
+          t(lang, "No jobs found for this vendor", "इस विक्रेता के लिए कोई काम नहीं मिला"),
+        );
+      }
+
+      const jobIndex = currentJobs.indexOf(selectedJobForWage);
+
+      if (jobIndex === -1) {
+        throw new Error(t(lang, "Selected job not found", "चुना हुआ काम नहीं मिला"));
+      }
+
+      // ----------------------------------------
+      // Existing arrays
+      // ----------------------------------------
+
+      const currentRates = Array.isArray(userData[0]?.wageRate) ? [...userData[0].wageRate] : [];
+
+      const currentRateTypes = Array.isArray(userData[0]?.wageRateType)
+        ? [...userData[0].wageRateType]
+        : [];
+
+      // ----------------------------------------
+      // Keep arrays aligned with jobs
+      // ----------------------------------------
+
+      while (currentRates.length < currentJobs.length) {
+        currentRates.push(0);
+      }
+
+      while (currentRateTypes.length < currentJobs.length) {
+        currentRateTypes.push("");
+      }
+
+      // ----------------------------------------
+      // Update ONLY selected job
+      // ----------------------------------------
+
+      currentRates[jobIndex] = rate;
+
+      currentRateTypes[jobIndex] = rateType;
+
+      // Keep maximum 5
+      const wageRates = currentRates.slice(0, 5);
+
+      const wageRateTypes = currentRateTypes.slice(0, 5);
+
       const response = await axios.patch(
         `${SERVER_URL}/${category}/wageRate`,
         {
-          wageRate: formData.wageRate,
-          wageRateType: formData.wageRateType,
           vendorId: userData[0].vendorId,
+
+          type: currentJobs,
+
+          wageRate: wageRates,
+
+          wageRateType: wageRateTypes,
         },
-        { headers: { Authorization: token } },
+        {
+          headers: {
+            Authorization: token,
+          },
+        },
       );
+
+      // ----------------------------------------
+      // Use backend response when available
+      // ----------------------------------------
 
       const updatedData = {
         ...userData[0],
-        wageRate: response.data.wageRate,
-        wageRateType: response.data.wageRateType,
+
+        type: Array.isArray(response.data?.type) ? response.data.type : currentJobs,
+
+        wageRate: Array.isArray(response.data?.wageRate) ? response.data.wageRate : wageRates,
+
+        wageRateType: Array.isArray(response.data?.wageRateType)
+          ? response.data.wageRateType
+          : wageRateTypes,
       };
+
       dispatch(addDataVendor(updatedData));
+
       localStorage.setItem(category, JSON.stringify(updatedData));
-      handleEditToggle("wageRate");
+
+      // ----------------------------------------
+      // Reset editor
+      // ----------------------------------------
+
+      setEditStates((prev) => ({
+        ...prev,
+        wageRate: false,
+      }));
+
+      setShowCustomWageType(false);
+      setCustomWageType("");
+      setSelectedJobForWage("");
     } catch (error) {
-      showError(error.response?.data?.message || "Something went wrong");
+      showError(
+        error.response?.data?.message ||
+          error.message ||
+          t(lang, "Something went wrong", "कुछ गलत हो गया"),
+      );
     } finally {
-      setIsLoading((prev) => ({ ...prev, wageRate: false }));
-      setIsLoading((prev) => ({ ...prev, wageRateType: false }));
+      setIsLoading((prev) => ({
+        ...prev,
+        wageRate: false,
+        wageRateType: false,
+      }));
     }
   }, [
     category,
     formData.wageRate,
     formData.wageRateType,
+    selectedJobForWage,
     userData,
     token,
     dispatch,
-    handleEditToggle,
     showError,
     lang,
   ]);
@@ -290,9 +512,20 @@ const Profile = () => {
     }
   }, [userData]);
 
+  // Get grouped jobs for display
+  const groupedJobs = useMemo(() => {
+    if (userData[0]?.type && Array.isArray(userData[0].type)) {
+      return getGroupedJobs(userData[0].type);
+    }
+    return {};
+  }, [userData, getGroupedJobs]);
+
+  // Translation helper for section titles
+  const sectionTitle = (en, hi) => t(lang, en, hi);
+  const sectionSubtitle = (en, hi) => t(lang, en, hi);
+
   return (
     <main className="profile profile-modern" ref={containerRef}>
-      {/* ================= HEADER ================= */}
       <header className="profile-header">
         <div className="profile-cover">
           <div className="profile-cover-orb profile-cover-orb-one" />
@@ -302,9 +535,9 @@ const Profile = () => {
             type="button"
             className="profile-close"
             onClick={handleCrossInProfile}
-            aria-label="Close profile"
+            aria-label={t(lang, "Close profile", "प्रोफ़ाइल बंद करें")}
           >
-            <img src={cross} alt="Close" />
+            <img src={cross} alt={t(lang, "Close", "बंद करें")} />
           </button>
 
           <div className="profile-avatar">
@@ -315,7 +548,9 @@ const Profile = () => {
 
         <div className="profile-heading">
           <span className="profile-badge">
-            {category === "vendor" ? "🛠️ सेवा प्रदाता • Professional" : "👤 ग्राहक • Customer"}
+            {category === "vendor"
+              ? t(lang, "🛠️ Service Provider • Professional", "🛠️ सेवा प्रदाता • प्रोफेशनल")
+              : t(lang, "👤 Customer • User", "👤 ग्राहक • उपयोगकर्ता")}
           </span>
 
           <h1>
@@ -324,8 +559,8 @@ const Profile = () => {
 
           <p>
             {category === "vendor"
-              ? "आपका प्रोफेशनल प्रोफाइल • Your Professional Profile"
-              : "आपकी प्रोफाइल • Your Personal Profile"}
+              ? t(lang, "Your Professional Profile", "आपका प्रोफेशनल प्रोफाइल")
+              : t(lang, "Your Personal Profile", "आपकी व्यक्तिगत प्रोफाइल")}
           </p>
         </div>
       </header>
@@ -336,12 +571,15 @@ const Profile = () => {
       </div>
 
       {/* ================= QUICK STATS ================= */}
-      <section className="profile-stats" aria-label="Profile summary">
+      <section
+        className="profile-stats"
+        aria-label={t(lang, "Profile summary", "प्रोफ़ाइल सारांश")}
+      >
         <div className="profile-stat-card blue">
           <span className="stat-icon">📦</span>
           <div>
             <strong>{userData[0]?.orders || 0}</strong>
-            <small>Orders • ऑर्डर</small>
+            <small>{t(lang, "Orders", "ऑर्डर")}</small>
           </div>
         </div>
 
@@ -349,7 +587,7 @@ const Profile = () => {
           <span className="stat-icon">🤝</span>
           <div>
             <strong>{userData[0]?.share || 0}</strong>
-            <small>Shares • शेयर</small>
+            <small>{t(lang, "Shares", "शेयर")}</small>
           </div>
         </div>
 
@@ -357,7 +595,7 @@ const Profile = () => {
           <span className="stat-icon">💰</span>
           <div>
             <strong>₹{Math.round((Number(userData[0]?.balance) || 0) * 100) / 100}</strong>
-            <small>Balance • बैलेंस</small>
+            <small>{t(lang, "Balance", "बैलेंस")}</small>
           </div>
         </div>
       </section>
@@ -367,8 +605,8 @@ const Profile = () => {
         <div className="profile-section-title">
           <span>👤</span>
           <div>
-            <h2>Account Details</h2>
-            <small>खाते की जानकारी</small>
+            <h2>{t(lang, "Account Details", "खाते की जानकारी")}</h2>
+            <small>{t(lang, "Your personal information", "आपकी व्यक्तिगत जानकारी")}</small>
           </div>
         </div>
 
@@ -377,7 +615,7 @@ const Profile = () => {
           <div className="profile-item-icon">👤</div>
 
           <div className="profile-item-content">
-            <small>Name • नाम</small>
+            <small>{t(lang, "Name", "नाम")}</small>
 
             {editStates.name ? (
               <input
@@ -386,10 +624,11 @@ const Profile = () => {
                 autoFocus
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
+                placeholder={t(lang, "Enter name", "नाम दर्ज करें")}
               />
             ) : (
               <strong>
-                <CamleCase element={userData[0]?.name || "Not available"} />
+                <CamleCase element={userData[0]?.name || t(lang, "Not available", "उपलब्ध नहीं")} />
               </strong>
             )}
           </div>
@@ -398,7 +637,11 @@ const Profile = () => {
             type="button"
             className="profile-icon-action"
             onClick={editStates.name ? handleNameUpdate : () => handleEditToggle("name")}
-            aria-label={editStates.name ? "Save name" : "Edit name"}
+            aria-label={
+              editStates.name
+                ? t(lang, "Save name", "नाम सेव करें")
+                : t(lang, "Edit name", "नाम संपादित करें")
+            }
           >
             {editStates.name ? (isLoading.name ? "⏳" : "✓") : "✏️"}
           </button>
@@ -409,12 +652,14 @@ const Profile = () => {
           <div className="profile-item-icon">📱</div>
 
           <div className="profile-item-content">
-            <small>Mobile • मोबाइल</small>
-            <strong>{userData[0]?.phoneNo || "Not available"}</strong>
+            <small>{t(lang, "Mobile", "मोबाइल")}</small>
+            <strong>{userData[0]?.phoneNo || t(lang, "Not available", "उपलब्ध नहीं")}</strong>
           </div>
 
           <span className={`profile-status ${userData[0]?.verifyPhoneNo ? "verified" : "pending"}`}>
-            {userData[0]?.verifyPhoneNo ? "✓ Verified" : "Verify"}
+            {userData[0]?.verifyPhoneNo
+              ? t(lang, "✓ Verified", "✓ सत्यापित")
+              : t(lang, "Verify", "सत्यापित करें")}
           </span>
         </div>
 
@@ -424,7 +669,7 @@ const Profile = () => {
             <div className="profile-item-icon">📧</div>
 
             <div className="profile-item-content">
-              <small>Email • ईमेल</small>
+              <small>{t(lang, "Email", "ईमेल")}</small>
               <strong>{userData[0].email}</strong>
             </div>
 
@@ -432,7 +677,7 @@ const Profile = () => {
               type="button"
               className="profile-icon-action"
               onClick={handleEmailEdit}
-              aria-label="Edit email"
+              aria-label={t(lang, "Edit email", "ईमेल संपादित करें")}
             >
               ✏️
             </button>
@@ -445,49 +690,49 @@ const Profile = () => {
         <div className="profile-section-title">
           <span>⚡</span>
           <div>
-            <h2>My Activity</h2>
-            <small>मेरी गतिविधियाँ</small>
+            <h2>{t(lang, "My Activity", "मेरी गतिविधियाँ")}</h2>
+            <small>{t(lang, "Your recent activity", "आपकी हाल की गतिविधियाँ")}</small>
           </div>
         </div>
 
         <div className="profile-actions-grid">
           <button type="button" onClick={handleOrdersView}>
             <span>📦</span>
-            <strong>Orders</strong>
-            <small>मेरे ऑर्डर</small>
+            <strong>{t(lang, "Orders", "ऑर्डर")}</strong>
+            <small>{t(lang, "My Orders", "मेरे ऑर्डर")}</small>
           </button>
 
           <button type="button" onClick={handleShareView}>
             <span>🤝</span>
-            <strong>Shares</strong>
-            <small>मेरी शेयरिंग</small>
+            <strong>{t(lang, "Shares", "शेयर")}</strong>
+            <small>{t(lang, "My Shares", "मेरी शेयरिंग")}</small>
           </button>
 
           <button type="button" onClick={handleShare}>
             <span>📤</span>
-            <strong>Share</strong>
-            <small>शेयर करें</small>
+            <strong>{t(lang, "Share", "शेयर")}</strong>
+            <small>{t(lang, "Share Now", "अभी शेयर करें")}</small>
           </button>
 
           <button type="button" onClick={handleEarnings}>
             <span>💰</span>
-            <strong>Earnings</strong>
-            <small>कमाई देखें</small>
+            <strong>{t(lang, "Earnings", "कमाई")}</strong>
+            <small>{t(lang, "View Earnings", "कमाई देखें")}</small>
           </button>
 
           {category === "vendor" && (
             <button type="button" onClick={handleBookingsView}>
               <span>📅</span>
-              <strong>Bookings</strong>
-              <small>बुकिंग देखें</small>
+              <strong>{t(lang, "Bookings", "बुकिंग")}</strong>
+              <small>{t(lang, "View Bookings", "बुकिंग देखें")}</small>
             </button>
           )}
 
           {category === "vendor" && (
             <button type="button" onClick={handleBookings}>
               <span>🚀</span>
-              <strong>Book Now</strong>
-              <small>अभी बुक करें</small>
+              <strong>{t(lang, "Book Now", "अभी बुक करें")}</strong>
+              <small>{t(lang, "Book Service", "सेवा बुक करें")}</small>
             </button>
           )}
         </div>
@@ -499,20 +744,35 @@ const Profile = () => {
           <div className="profile-section-title">
             <span>🛠️</span>
             <div>
-              <h2>Professional Profile</h2>
-              <small>प्रोफेशनल जानकारी</small>
+              <h2>{t(lang, "Professional Profile", "प्रोफेशनल प्रोफाइल")}</h2>
+              <small>{t(lang, "Your professional information", "आपकी प्रोफेशनल जानकारी")}</small>
             </div>
           </div>
 
-          {/* Job Profile */}
-          <div className="profile-item">
+          {/* ================= BEAUTIFUL JOB PROFILE ================= */}
+          <div className="profile-item profile-job-item">
             <div className="profile-item-icon">🔧</div>
 
             <div className="profile-item-content">
-              <small>Job Profile • काम</small>
-              <strong>
-                <CamleCase element={userData[0]?.type || "Not set"} />
-              </strong>
+              <small>{t(lang, "Job Profile", "काम")}</small>
+
+              {userData[0]?.type &&
+              Array.isArray(userData[0].type) &&
+              userData[0].type.length > 0 ? (
+                <div className="job-cards-container">
+                  {Object.entries(groupedJobs).map(([categoryName, jobs]) => (
+                    <div className="job-tags-modern">
+                      {jobs.map((job, index) => (
+                        <span key={index} className="job-tag-modern">
+                          <span className="job-tag-label">{getJobDisplay(job)}</span>
+                        </span>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                ""
+              )}
             </div>
           </div>
 
@@ -521,14 +781,18 @@ const Profile = () => {
             <div className="profile-item-icon">⭐</div>
 
             <div className="profile-item-content">
-              <small>Customer Rating • रेटिंग</small>
+              <small>{t(lang, "Customer Rating", "रेटिंग")}</small>
               <strong className="rating-value">
-                {userData[0]?.rating ? `${userData[0].rating} / 5` : "No Ratings"}
+                {userData[0]?.rating
+                  ? `${userData[0].rating} / 5`
+                  : t(lang, "No Ratings", "कोई रेटिंग नहीं")}
               </strong>
             </div>
 
             {userData[0]?.ratingCount > 0 && (
-              <span className="rating-count">{userData[0].ratingCount} reviews</span>
+              <span className="rating-count">
+                {userData[0].ratingCount} {t(lang, "reviews", "समीक्षाएँ")}
+              </span>
             )}
           </div>
 
@@ -537,72 +801,345 @@ const Profile = () => {
             <div className="profile-item-icon">💵</div>
 
             <div className="profile-item-content">
-              <small>Wage Rate • मजदूरी</small>
+              <small>{t(lang, "Service Charge", "सेवा शुल्क")}</small>
 
               {editStates.wageRate ? (
-                <div className="wage-editor">
-                  <input
-                    className="modern-profile-input"
-                    type="number"
-                    min="0"
-                    placeholder="₹ Rate"
-                    autoFocus
-                    value={formData.wageRate}
-                    onChange={(e) => handleInputChange("wageRate", e.target.value)}
-                  />
+                <div className="wage-editor-modern">
+                  {/* =========================
+            JOB SELECTION
+        ========================== */}
+                  <div className="wage-field-group">
+                    <div className="wage-field-header">
+                      <span className="wage-field-icon">🔧</span>
 
-                  <select
-                    className="modern-profile-select"
-                    value={formData.wageRateType}
-                    onChange={(e) => handleInputChange("wageRateType", e.target.value)}
-                  >
-                    <option value="">Select</option>
-                    <option value="Day">Per Day</option>
-                    <option value="Hour">Per Hour</option>
-                    <option value="Km">Per Km</option>
-                    <option value="1k People">Per 1k People</option>
-                    <option value="Service">Per Service</option>
-                    <option value="Other">Other</option>
-                  </select>
+                      <label className="wage-label">{t(lang, "Select Job", "काम चुनें")}</label>
+                    </div>
+
+                    <div className="wage-select-wrapper">
+                      <select
+                        className="modern-profile-select wage-select"
+                        value={selectedJobForWage || ""}
+                        onChange={(e) => {
+                          const job = e.target.value;
+
+                          setSelectedJobForWage(job);
+
+                          if (!job) {
+                            handleInputChange("wageRate", "");
+                            handleInputChange("wageRateType", "");
+                            setShowCustomWageType(false);
+                            setCustomWageType("");
+                            return;
+                          }
+
+                          const jobs = Array.isArray(userData[0]?.type)
+                            ? userData[0].type
+                            : userData[0]?.type
+                              ? [userData[0].type]
+                              : [];
+
+                          const rates = Array.isArray(userData[0]?.wageRate)
+                            ? userData[0].wageRate
+                            : [];
+
+                          const rateTypes = Array.isArray(userData[0]?.wageRateType)
+                            ? userData[0].wageRateType
+                            : [];
+
+                          const index = jobs.indexOf(job);
+
+                          if (index >= 0) {
+                            handleInputChange("wageRate", rates[index] ?? "");
+
+                            const currentType = rateTypes[index] ?? "";
+
+                            handleInputChange("wageRateType", currentType);
+
+                            if (
+                              currentType &&
+                              !["Day", "Hour", "Km", "1k People", "Service"].includes(currentType)
+                            ) {
+                              setShowCustomWageType(true);
+                              setCustomWageType(currentType);
+                            } else {
+                              setShowCustomWageType(false);
+                              setCustomWageType("");
+                            }
+                          }
+                        }}
+                      >
+                        <option value="">{t(lang, "Select a job", "कोई काम चुनें")}</option>
+
+                        {Array.isArray(userData[0]?.type) &&
+                          userData[0].type.map((job) => (
+                            <option key={job} value={job}>
+                              {getJobEmoji(job)} {getJobDisplay(job)}
+                            </option>
+                          ))}
+                      </select>
+
+                      <span className="select-arrow">▼</span>
+                    </div>
+                  </div>
+
+                  {/* =========================
+            WAGE RATE
+        ========================== */}
+                  <div className="wage-field-group">
+                    <div className="wage-field-header">
+                      <span className="wage-field-icon">💰</span>
+
+                      <label className="wage-label">{t(lang, "Rate Amount", "दर राशि")}</label>
+                    </div>
+
+                    <div className="wage-input-wrapper">
+                      <span className="wage-currency-symbol">₹</span>
+
+                      <input
+                        className="modern-profile-input wage-amount-input"
+                        type="number"
+                        min="0"
+                        step="1"
+                        placeholder={t(lang, "Enter rate", "दर दर्ज करें")}
+                        autoFocus
+                        value={formData.wageRate ?? ""}
+                        onChange={(e) => handleInputChange("wageRate", e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* =========================
+            RATE TYPE
+        ========================== */}
+                  <div className="wage-field-group">
+                    <div className="wage-field-header">
+                      <span className="wage-field-icon">⏱️</span>
+
+                      <label className="wage-label">{t(lang, "Rate Type", "दर का प्रकार")}</label>
+                    </div>
+
+                    <div className="wage-select-wrapper">
+                      <select
+                        className="modern-profile-select wage-select"
+                        value={showCustomWageType ? "Other" : formData.wageRateType || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+
+                          if (value === "Other") {
+                            setShowCustomWageType(true);
+                            setCustomWageType(
+                              formData.wageRateType &&
+                                !["Day", "Hour", "Km", "1k People", "Service"].includes(
+                                  formData.wageRateType,
+                                )
+                                ? formData.wageRateType
+                                : "",
+                            );
+
+                            return;
+                          }
+
+                          setShowCustomWageType(false);
+                          setCustomWageType("");
+
+                          handleInputChange("wageRateType", value);
+                        }}
+                      >
+                        <option value="">{t(lang, "Select type", "प्रकार चुनें")}</option>
+
+                        <option value="Day">📅 {t(lang, "Per Day", "प्रति दिन")}</option>
+
+                        <option value="Hour">⏰ {t(lang, "Per Hour", "प्रति घंटा")}</option>
+
+                        <option value="Km">🚗 {t(lang, "Per Km", "प्रति किलोमीटर")}</option>
+
+                        <option value="1k People">
+                          👥 {t(lang, "Per 1k People", "प्रति 1 हजार लोग")}
+                        </option>
+
+                        <option value="Service">🛠️ {t(lang, "Per Service", "प्रति सेवा")}</option>
+
+                        <option value="Other">✨ {t(lang, "Other", "अन्य")}</option>
+                      </select>
+
+                      <span className="select-arrow">▼</span>
+                    </div>
+
+                    {/* =========================
+              CUSTOM RATE TYPE
+          ========================== */}
+                    {showCustomWageType && (
+                      <div className="custom-wage-input-modern">
+                        <div className="custom-wage-input-wrapper">
+                          <span className="custom-input-icon">✏️</span>
+
+                          <input
+                            className="modern-profile-input custom-type-input-modern"
+                            type="text"
+                            placeholder={t(
+                              lang,
+                              "e.g. Per Square Feet, Per Month, etc.",
+                              "जैसे: प्रति वर्ग फुट, प्रति महीना, आदि।",
+                            )}
+                            value={customWageType}
+                            onChange={(e) => {
+                              const value = e.target.value;
+
+                              setCustomWageType(value);
+
+                              handleInputChange("wageRateType", value);
+                            }}
+                            autoFocus
+                          />
+                        </div>
+
+                        <div className="custom-input-tip">
+                          <span className="tip-icon">💡</span>
+
+                          <span className="tip-text">
+                            {t(
+                              lang,
+                              "Enter your own custom rate type",
+                              "अपनी खुद की कस्टम दर प्रकार दर्ज करें",
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* =========================
+            ACTION BUTTONS
+        ========================== */}
+                  <div className="wage-action-buttons">
+                    <button
+                      type="button"
+                      className="wage-cancel-btn"
+                      onClick={() => {
+                        setEditStates((prev) => ({
+                          ...prev,
+                          wageRate: false,
+                        }));
+
+                        setShowCustomWageType(false);
+                        setCustomWageType("");
+                        setSelectedJobForWage("");
+                      }}
+                    >
+                      ✕ {t(lang, "Cancel", "रद्द करें")}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="wage-save-btn-modern"
+                      onClick={handleWageRateUpdate}
+                      disabled={isLoading.wageRate || !selectedJobForWage}
+                    >
+                      {isLoading.wageRate ? (
+                        <span className="profile-spinner" />
+                      ) : (
+                        <>
+                          <span className="save-icon">✓</span>
+                          {t(lang, "Save Service Charge", "सेवा शुल्क सेव करें")}
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               ) : (
-                <strong className="wage-value">
-                  {userData[0]?.wageRate && userData[0]?.wageRateType ? (
-                    <>
-                      ₹{userData[0].wageRate}
-                      <span> / {userData[0].wageRateType}</span>
-                    </>
+                /* =========================
+          DISPLAY ALL JOB RATES
+      ========================== */
+                <div className="wage-display-modern">
+                  {Array.isArray(userData[0]?.type) && userData[0].type.length > 0 ? (
+                    <div className="wage-display-list">
+                      {userData[0].type.map((job, index) => {
+                        const rate = Array.isArray(userData[0]?.wageRate)
+                          ? userData[0].wageRate[index]
+                          : null;
+
+                        const rateType = Array.isArray(userData[0]?.wageRateType)
+                          ? userData[0].wageRateType[index]
+                          : "";
+
+                        return (
+                          <div className="wage-display-content" key={`${job}-${index}`}>
+                            <span className="wage-display-job">{getJobDisplay(job)}</span>
+
+                            {rate !== undefined && rate !== null && rate !== "" ? (
+                              <div>
+                                <span className="wage-display-amount">₹{rate}</span>
+
+                                {rateType && (
+                                  <>
+                                    <span className="wage-display-divider">/</span>
+
+                                    <span className="wage-display-type">{rateType}</span>
+                                  </>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="wage-display-empty">
+                                {t(lang, "Rate not set", "दर निर्धारित नहीं")}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   ) : (
-                    "No Wage Rate"
+                    <span className="wage-display-empty">
+                      {t(lang, "No Wage Rate Set", "कोई मजदूरी दर निर्धारित नहीं")}
+                    </span>
                   )}
-                </strong>
+                </div>
               )}
             </div>
 
+            {/* =========================
+      EDIT / CANCEL BUTTON
+  ========================== */}
             <button
               type="button"
-              className="profile-icon-action profile-save-action"
+              className={`profile-icon-action profile-save-action ${
+                editStates.wageRate ? "active" : ""
+              }`}
               onClick={
-                editStates.wageRate ? handleWageRateUpdate : () => handleEditToggle("wageRate")
+                editStates.wageRate
+                  ? () => {
+                      setEditStates((prev) => ({
+                        ...prev,
+                        wageRate: false,
+                      }));
+
+                      setShowCustomWageType(false);
+                      setCustomWageType("");
+                      setSelectedJobForWage("");
+                    }
+                  : () => handleEditToggle("wageRate")
+              }
+              title={
+                editStates.wageRate
+                  ? t(lang, "Cancel", "रद्द करें")
+                  : t(lang, "Edit", "संपादित करें")
               }
             >
-              {isLoading.wageRate ? (
-                <span className="profile-spinner" />
-              ) : editStates.wageRate ? (
-                "✓"
+              {editStates.wageRate ? (
+                <span className="cancel-icon">✕</span>
               ) : (
-                "✏️"
+                <span className="edit-icon">✏️</span>
               )}
             </button>
           </div>
-
           {/* Commission */}
           <div className="profile-item">
             <div className="profile-item-icon">📊</div>
 
             <div className="profile-item-content">
-              <small>Commission • कमीशन</small>
-              <strong className="commission-value">{userData[0]?.commission || 0} / Order</strong>
+              <small>{t(lang, "Commission", "कमीशन")}</small>
+              <strong className="commission-value">
+                {userData[0]?.commission || 0} / {t(lang, "Order", "ऑर्डर")}
+              </strong>
             </div>
           </div>
         </section>
@@ -613,8 +1150,8 @@ const Profile = () => {
         <div className="profile-section-title">
           <span>💰</span>
           <div>
-            <h2>Wallet & Earnings</h2>
-            <small>वॉलेट और कमाई</small>
+            <h2>{t(lang, "Wallet", "वॉलेट ")}</h2>
+            <small>{t(lang, "Your balance ", "आपका बैलेंस ")}</small>
           </div>
         </div>
 
@@ -622,12 +1159,12 @@ const Profile = () => {
           <div className="wallet-icon">💳</div>
 
           <div className="wallet-info">
-            <small>Available Balance • उपलब्ध बैलेंस</small>
+            <small>{t(lang, "Available Balance", "उपलब्ध बैलेंस")}</small>
             <strong>₹{Math.round((Number(userData[0]?.balance) || 0) * 100) / 100}</strong>
           </div>
 
           <button type="button" className="wallet-add-button" onClick={handleAddMoney}>
-            ➕ Add Money
+            ➕ {t(lang, "Add Money", "पैसे जोड़ें")}
           </button>
         </div>
       </section>
@@ -637,8 +1174,8 @@ const Profile = () => {
         <div className="profile-section-title">
           <span>📍</span>
           <div>
-            <h2>My Address</h2>
-            <small>मेरा पूरा पता • Complete Address</small>
+            <h2>{t(lang, "My Address", "मेरा पता")}</h2>
+            <small>{t(lang, "Complete Address", "पूरा पता")}</small>
           </div>
         </div>
 
@@ -657,28 +1194,36 @@ const Profile = () => {
               {userData[0].address[0].post && (
                 <div className="address-line">
                   <span>📮</span>
-                  <span>Post: {userData[0].address[0].post}</span>
+                  <span>
+                    {t(lang, "Post", "पोस्ट")}: {userData[0].address[0].post}
+                  </span>
                 </div>
               )}
 
               {userData[0].address[0].dist && (
                 <div className="address-line">
                   <span>🏙️</span>
-                  <span>District: {userData[0].address[0].dist}</span>
+                  <span>
+                    {t(lang, "District", "जिला")}: {userData[0].address[0].dist}
+                  </span>
                 </div>
               )}
 
               {userData[0].address[0].state && (
                 <div className="address-line">
                   <span>🗺️</span>
-                  <span>State: {userData[0].address[0].state}</span>
+                  <span>
+                    {t(lang, "State", "राज्य")}: {userData[0].address[0].state}
+                  </span>
                 </div>
               )}
 
               {userData[0].address[0].pincode && (
                 <div className="address-line">
                   <span>📌</span>
-                  <strong>PIN: {userData[0].address[0].pincode}</strong>
+                  <strong>
+                    {t(lang, "PIN", "पिन")}: {userData[0].address[0].pincode}
+                  </strong>
                 </div>
               )}
             </div>
@@ -687,14 +1232,17 @@ const Profile = () => {
           <div className="empty-address">
             <span>📍</span>
             <div>
-              <strong>Address not added</strong>
-              <small>अभी अपना पूरा पता जोड़ें • Add your address</small>
+              <strong>{t(lang, "Address not added", "पता नहीं जोड़ा गया")}</strong>
+              <small>{t(lang, "Add your complete address", "अपना पूरा पता जोड़ें")}</small>
             </div>
           </div>
         )}
 
         <button type="button" className="full-width-action" onClick={handleAddAddress}>
-          📍 {userData[0]?.address?.[0] ? "Change Address • पता बदलें" : "Add Address • पता जोड़ें"}
+          📍{" "}
+          {userData[0]?.address?.[0]
+            ? t(lang, "Change Address", "पता बदलें")
+            : t(lang, "Add Address", "पता जोड़ें")}
         </button>
       </section>
 
@@ -703,15 +1251,15 @@ const Profile = () => {
         <button type="button" className="concern-button" onClick={handleCreateConcern}>
           <span>🆘</span>
           <div>
-            <strong>Raise Concern</strong>
-            <small>समस्या बताएं</small>
+            <strong>{t(lang, "Raise Concern", "समस्या बताएं")}</strong>
+            <small>{t(lang, "Report an issue", "कोई समस्या रिपोर्ट करें")}</small>
           </div>
         </button>
 
         {category === "vendor" && (
           <button type="button" className="leave-button" onClick={takeLeave}>
             <div>
-              <strong>🌴 Leave Management • छुट्टी प्रबंधन</strong>
+              <strong>{t(lang, "🌴 Leave Management", "🌴 छुट्टी प्रबंधन")}</strong>
             </div>
           </button>
         )}
@@ -719,8 +1267,8 @@ const Profile = () => {
         <button type="button" className="logout-button" onClick={handleLogout}>
           <span>🚪</span>
           <div>
-            <strong>Logout</strong>
-            <small>लॉगआउट</small>
+            <strong>{t(lang, "Logout", "लॉगआउट")}</strong>
+            <small>{t(lang, "Sign out", "साइन आउट करें")}</small>
           </div>
         </button>
       </section>

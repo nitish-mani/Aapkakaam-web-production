@@ -53,8 +53,8 @@ const themeConfig = {
 };
 
 const getTheme = () => {
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  return prefersDark ? themeConfig.dark : themeConfig.light;
+  const prefersDark = themeConfig.light;
+  return prefersDark;
 };
 
 // ============================================================
@@ -62,7 +62,7 @@ const getTheme = () => {
 // ============================================================
 
 const getBaseConfig = () => {
-  const theme = getTheme();
+  const theme = themeConfig.light;
   return {
     confirmButtonColor: theme.confirmButtonColor,
     cancelButtonColor: theme.cancelButtonColor,
@@ -194,7 +194,6 @@ export const showWarning = (message, title = "Warning") => {
     timerProgressBar: true,
     iconColor: icons.warning.color,
     customClass: {
-      ...baseConfig.customClass,
       popup: "swal-popup-modern swal-warning",
     },
     willClose: () => {

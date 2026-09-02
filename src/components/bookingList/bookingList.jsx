@@ -131,6 +131,11 @@ export default function BookingList({ data, lang = "en" }) {
           </span>
         </div>
 
+        <div className="booking-row">
+          <span className="booking-label">{t("Service Type", "सेवा प्रकार")}</span>
+          <span className="booking-value booking-date">{data.type.toUpperCase()}</span>
+        </div>
+
         {/* Rating & Review */}
         {data.orderCompleted && (
           <div className="booking-rating-section">

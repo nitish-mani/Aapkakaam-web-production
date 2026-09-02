@@ -106,8 +106,9 @@ const PrivacyPolicy = () => {
       title: t("Freemium & Commission Model", "फ्रीमियम और कमीशन मॉडल"),
       items: [
         t(
-          "Vendors get the first 5 service orders free. After that, a commission of ₹30 to ₹100 per order applies based on the service. No refunds are available for canceled orders. Vendors must maintain sufficient balance to use our services.",
-          "विक्रेताओं को पहले 5 सेवा ऑर्डर मुफ्त मिलते हैं। उसके बाद, सेवा के आधार पर ₹30 से ₹100 प्रति ऑर्डर का कमीशन लागू होता है। रद्द किए गए ऑर्डर के लिए कोई रिफंड उपलब्ध नहीं है। विक्रेताओं को हमारी सेवाओं का उपयोग करने के लिए पर्याप्त बैलेंस बनाए रखना होगा।",
+          "Vendors get the first 5 service orders free but at the time of signup they pay 50 rupees joining fee. After that, a commission of fixed ₹50 per order applies and it is based on discounts they get on wallet recharge. No refunds are available for canceled orders. Vendors must maintain sufficient balance to use our services. Users also get 50 rupees as a joining balance and they also pay 10 rupees or discounted rate based on their wallet recharge for orders.",
+
+          "विक्रेताओं को पहले 5 सेवा ऑर्डर मुफ्त मिलते हैं लेकिन साइनअप के समय वे 50 रुपये ज्वाइनिंग फीस का भुगतान करते हैं। उसके बाद, प्रति ऑर्डर ₹50 का निश्चित कमीशन लागू होता है और यह वॉलेट रिचार्ज पर मिलने वाली छूट पर आधारित होता है। रद्द किए गए ऑर्डर के लिए कोई रिफंड उपलब्ध नहीं है। विक्रेताओं को हमारी सेवाओं का उपयोग करने के लिए पर्याप्त बैलेंस बनाए रखना होगा। उपयोगकर्ताओं को भी 50 रुपये ज्वाइनिंग बैलेंस मिलता है और वे अपने वॉलेट रिचार्ज के आधार पर 10 रुपये या छूट दर का भुगतान करते हैं।",
         ),
       ],
     },
@@ -116,8 +117,9 @@ const PrivacyPolicy = () => {
       title: t("Share & Earn Program", "शेयर और कमाएं कार्यक्रम"),
       items: [
         t(
-          "Users sharing links via their accounts earn ₹1.5 to ₹5 or 5% of company commission from each completed order beyond the first 5 free orders. Only completed orders count; canceled orders do not contribute to earnings. Earnings may be affected due to discount given to vendors and users. It will be based on discounted percentage. Daily attendance is mandatory - 6 minutes total per day and 2 minutes on each three pages (Home Page, Share Page, View Share Page) with 100% to qualify for withdraw.",
-          "अपने खातों के माध्यम से लिंक साझा करने वाले उपयोगकर्ता पहले 5 मुफ्त ऑर्डर से परे प्रत्येक पूर्ण ऑर्डर से ₹1.5 से ₹5 या कंपनी कमीशन का 5% कमाते हैं। केवल पूर्ण किए गए ऑर्डर गिने जाते हैं; रद्द किए गए ऑर्डर कमाई में योगदान नहीं करते हैं। विक्रेताओं और उपयोगकर्ताओं को दी गई छूट के कारण कमाई प्रभावित हो सकती है। यह छूट प्रतिशत पर आधारित होगी। दैनिक उपस्थिति अनिवार्य है - प्रति दिन कुल 6 मिनट और तीन पृष्ठों (होम पेज, शेयर पेज, व्यू शेयर पेज) पर 2 मिनट 100% के साथ निकासी के लिए योग्य होने के लिए।",
+          "Users sharing links via their accounts earn ₹1.5 to ₹5 or 5% of company commission from each completed order beyond the first 5 free orders. Only completed orders count; canceled orders do not contribute to earnings. First 1000 completed orders per month they get 10 rupees per order after that 5% is applied. Earnings may be affected due to discount given to vendors and users. It will be based on discounted percentage.",
+
+          "अपने खातों के माध्यम से लिंक साझा करने वाले उपयोगकर्ता पहले 5 मुफ्त ऑर्डर से परे प्रत्येक पूर्ण ऑर्डर से ₹1.5 से ₹5 या कंपनी कमीशन का 5% कमाते हैं। केवल पूर्ण किए गए ऑर्डर गिने जाते हैं; रद्द किए गए ऑर्डर कमाई में योगदान नहीं करते हैं। प्रति माह पहले 1000 पूर्ण ऑर्डर पर उन्हें प्रति ऑर्डर 10 रुपये मिलते हैं, उसके बाद 5% लागू होता है। विक्रेताओं और उपयोगकर्ताओं को दी गई छूट के कारण कमाई प्रभावित हो सकती है। यह छूट प्रतिशत पर आधारित होगी।",
         ),
       ],
     },

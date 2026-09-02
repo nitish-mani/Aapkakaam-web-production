@@ -1,21 +1,26 @@
 import React, { useCallback, useMemo } from "react";
-import { useDispatch } from "react-redux";
+
+import { useDispatch, useSelector } from "react-redux";
+
 import "./calendar.css";
+
 import { setClearDateField, setIsSelectedDateValid } from "../../utils/categoryslice";
+
 import { showWarning } from "../showAlert";
 
-/* ============================================================
-   DAYS
-   ============================================================ */
+// ============================================================
+// DAYS
+// ============================================================
 
 const DAYS_OF_WEEK = {
   en: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+
   hi: ["सोम", "मंगल", "बुध", "गुरु", "शुक्र", "शनि", "रवि"],
 };
 
-/* ============================================================
-   HINDI MONTHS
-   ============================================================ */
+// ============================================================
+// HINDI MONTHS
+// ============================================================
 
 const MONTHS_HI = [
   "जनवरी",
@@ -32,9 +37,28 @@ const MONTHS_HI = [
   "दिसंबर",
 ];
 
-/* ============================================================
-   STATUS TEXT
-   ============================================================ */
+// ============================================================
+// ENGLISH MONTHS
+// ============================================================
+
+const MONTHS_EN = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+// ============================================================
+// STATUS TEXT
+// ============================================================
 
 const STATUS_TEXT = {
   en: {
@@ -44,6 +68,10 @@ const STATUS_TEXT = {
     pending: "Pending",
     alreadyBooked: "Already Booked...",
     pastDate: "Past Date",
+    previousYear: "Previous year",
+    previousMonth: "Previous month",
+    nextMonth: "Next month",
+    nextYear: "Next year",
   },
 
   hi: {
@@ -53,18 +81,38 @@ const STATUS_TEXT = {
     pending: "पेंडिंग",
     alreadyBooked: "पहले से बुक है...",
     pastDate: "पुरानी तारीख",
+    previousYear: "पिछला वर्ष",
+    previousMonth: "पिछला महीना",
+    nextMonth: "अगला महीना",
+    nextYear: "अगला वर्ष",
   },
 };
 
-/* ============================================================
-   MIN YEAR
-   ============================================================ */
+// ============================================================
+// MIN YEAR
+// ============================================================
 
 const MIN_YEAR = 2000;
 
-/* ============================================================
-   CALENDAR
-   ============================================================ */
+// ============================================================
+// NORMALIZE LANGUAGE
+// ============================================================
+
+const normalizeLanguage = (language) => {
+  const value = String(language ?? "")
+    .trim()
+    .toLowerCase();
+
+  if (value === "hi" || value === "hin" || value === "hindi") {
+    return "hi";
+  }
+
+  return "en";
+};
+
+// ============================================================
+// CALENDAR
+// ============================================================
 
 const Calendar = ({
   bookingDate,
@@ -78,25 +126,59 @@ const Calendar = ({
   calendar,
   setIsDateClicked,
   setBooking_date = () => {},
-
-  // "hi" or "en"
-  language = "hi",
+  language,
 }) => {
   const dispatch = useDispatch();
 
-  /* ==========================================================
-     LANGUAGE
-     ========================================================== */
+  // ==========================================================
+  // LANGUAGE
+  //
+  // Redux is the primary source.
+  //
+  // Supports:
+  // "en"
+  // "eng"
+  // "hi"
+  // "hin"
+  //
+  // ==========================================================
 
-  const lang = language === "hin" ? "hi" : language === "hi" ? "hi" : "en";
+  const reduxLanguage = useSelector((store) => store.category?.selectLanguage);
 
-  const daysOfWeek = DAYS_OF_WEEK[lang];
+  const lang = useMemo(() => {
+    return normalizeLanguage(reduxLanguage ?? language ?? "en");
+  }, [reduxLanguage, language]);
 
-  const statusText = STATUS_TEXT[lang];
+  // ==========================================================
+  // TRANSLATION HELPER
+  // ==========================================================
 
-  /* ==========================================================
-     CURRENT DATE
-     ========================================================== */
+  const t = useCallback(
+    (en, hi) => {
+      return lang === "hi" ? hi : en;
+    },
+    [lang],
+  );
+
+  // ==========================================================
+  // DAYS
+  // ==========================================================
+
+  const daysOfWeek = useMemo(() => {
+    return DAYS_OF_WEEK[lang] || DAYS_OF_WEEK.en;
+  }, [lang]);
+
+  // ==========================================================
+  // STATUS TEXT
+  // ==========================================================
+
+  const statusText = useMemo(() => {
+    return STATUS_TEXT[lang] || STATUS_TEXT.en;
+  }, [lang]);
+
+  // ==========================================================
+  // CURRENT DATE
+  // ==========================================================
 
   const currentDate = useMemo(() => {
     const now = new Date();
@@ -105,47 +187,38 @@ const Calendar = ({
   }, []);
 
   const current_date = currentDate.getDate();
+
   const current_month = currentDate.getMonth();
+
   const current_year = currentDate.getFullYear();
 
-  /* ==========================================================
-     MONTH NAME
-     ========================================================== */
+  // ==========================================================
+  // MONTH NAME
+  // ==========================================================
 
   const monthName = useMemo(() => {
-    if (lang === "hi") {
-      return MONTHS_HI[month];
+    if (month === undefined || month === null) {
+      return "";
     }
 
-    return months?.[month] || "";
+    if (lang === "hi") {
+      return MONTHS_HI[month] || "";
+    }
+
+    return MONTHS_EN[month] || months?.[month] || "";
   }, [lang, month, months]);
 
-  /* ==========================================================
-     NUMBER FORMAT
-     ========================================================== */
-
-  const formatNumber = useCallback(
-    (number) => {
-      if (lang === "hi") {
-        return new Intl.NumberFormat("hi-IN").format(number);
-      }
-
-      return number;
-    },
-    [lang],
-  );
-
-  /* ==========================================================
-     CREATE DATE OBJECT
-     ========================================================== */
+  // ==========================================================
+  // CREATE DATE
+  // ==========================================================
 
   const createDate = useCallback((checkYear, checkMonth, day) => {
     return new Date(checkYear, checkMonth, day);
   }, []);
 
-  /* ==========================================================
-     CURRENT DAY
-     ========================================================== */
+  // ==========================================================
+  // CURRENT DAY
+  // ==========================================================
 
   const isCurrentDay = useCallback(
     (checkYear, checkMonth, day) => {
@@ -154,9 +227,9 @@ const Calendar = ({
     [current_year, current_month, current_date],
   );
 
-  /* ==========================================================
-     PAST DATE
-     ========================================================== */
+  // ==========================================================
+  // PAST DATE
+  // ==========================================================
 
   const isPastDate = useCallback(
     (checkYear, checkMonth, day) => {
@@ -167,41 +240,49 @@ const Calendar = ({
     [createDate, currentDate],
   );
 
-  /* ==========================================================
-     PREVIOUS MONTH
-     ========================================================== */
+  // ==========================================================
+  // PREVIOUS MONTH
+  // ==========================================================
 
   const handlePrevMonth = useCallback(() => {
-    const newMonth = month < 1 ? 11 : month - 1;
+    let newMonth = month - 1;
 
-    const newYear = month < 1 ? year - 1 : year;
+    let newYear = year;
 
-    setMonth(newMonth);
-
-    setYear(Math.max(newYear, MIN_YEAR));
-
-    dispatch(setClearDateField(""));
-  }, [month, year, setMonth, setYear, dispatch]);
-
-  /* ==========================================================
-     NEXT MONTH
-     ========================================================== */
-
-  const handleNextMonth = useCallback(() => {
-    const newMonth = month > 10 ? 0 : month + 1;
-
-    const newYear = month > 10 ? year + 1 : year;
+    if (newMonth < 0) {
+      newMonth = 11;
+      newYear = year - 1;
+    }
 
     setMonth(newMonth);
-
     setYear(newYear);
 
     dispatch(setClearDateField(""));
   }, [month, year, setMonth, setYear, dispatch]);
 
-  /* ==========================================================
-     PREVIOUS YEAR
-     ========================================================== */
+  // ==========================================================
+  // NEXT MONTH
+  // ==========================================================
+
+  const handleNextMonth = useCallback(() => {
+    let newMonth = month + 1;
+
+    let newYear = year;
+
+    if (newMonth > 11) {
+      newMonth = 0;
+      newYear = year + 1;
+    }
+
+    setMonth(newMonth);
+    setYear(newYear);
+
+    dispatch(setClearDateField(""));
+  }, [month, year, setMonth, setYear, dispatch]);
+
+  // ==========================================================
+  // PREVIOUS YEAR
+  // ==========================================================
 
   const handlePrevYear = useCallback(() => {
     const newYear = Math.max(year - 1, MIN_YEAR);
@@ -211,9 +292,9 @@ const Calendar = ({
     dispatch(setClearDateField(""));
   }, [year, setYear, dispatch]);
 
-  /* ==========================================================
-     NEXT YEAR
-     ========================================================== */
+  // ==========================================================
+  // NEXT YEAR
+  // ==========================================================
 
   const handleNextYear = useCallback(() => {
     setYear(year + 1);
@@ -221,18 +302,9 @@ const Calendar = ({
     dispatch(setClearDateField(""));
   }, [year, setYear, dispatch]);
 
-  /* ==========================================================
-     CHECK BOOKED DATE
-     
-     IMPORTANT:
-     We support:
-       5
-       "5"
-       "5 / 8 / 2026"
-       "05 / 08 / 2026"
-       { date: 5, month: 7, year: 2026 }
-     
-     ========================================================== */
+  // ==========================================================
+  // CHECK BOOKED DATE
+  // ==========================================================
 
   const isDateBooked = useCallback(
     (day) => {
@@ -241,12 +313,18 @@ const Calendar = ({
       }
 
       return bookingDate.some((item) => {
-        /* Simple number */
-        if (typeof item === "number" || typeof item === "string") {
+        // ------------------------------------------------
+        // Number
+        // ------------------------------------------------
+
+        if (typeof item === "number") {
           return Number(item) === day;
         }
 
-        /* Object */
+        // ------------------------------------------------
+        // Object
+        // ------------------------------------------------
+
         if (item && typeof item === "object") {
           const itemDay = item.day ?? item.date;
 
@@ -263,9 +341,14 @@ const Calendar = ({
           if (itemDay !== undefined) {
             return Number(itemDay) === day;
           }
+
+          return false;
         }
 
-        /* String date */
+        // ------------------------------------------------
+        // String
+        // ------------------------------------------------
+
         if (typeof item === "string") {
           return (
             item.includes(`${day} / ${month + 1} / ${year}`) ||
@@ -279,17 +362,17 @@ const Calendar = ({
     [bookingDate, month, year],
   );
 
-  /* ==========================================================
-     SELECT DATE
-     ========================================================== */
+  // ==========================================================
+  // SELECT DATE
+  // ==========================================================
 
   const selectDate = useCallback(
     (date) => {
       const selectedDate = new Date(year, month, date);
 
-      /* -----------------------------------------------
-         BOOKED
-         ----------------------------------------------- */
+      // ------------------------------------------------------
+      // BOOKED
+      // ------------------------------------------------------
 
       if (isDateBooked(date)) {
         showWarning(statusText.alreadyBooked);
@@ -297,9 +380,9 @@ const Calendar = ({
         return;
       }
 
-      /* -----------------------------------------------
-         PAST DATE
-         ----------------------------------------------- */
+      // ------------------------------------------------------
+      // PAST DATE
+      // ------------------------------------------------------
 
       if (selectedDate < currentDate) {
         dispatch(setIsSelectedDateValid(false));
@@ -313,9 +396,9 @@ const Calendar = ({
         return;
       }
 
-      /* -----------------------------------------------
-         VALID FUTURE / TODAY
-         ----------------------------------------------- */
+      // ------------------------------------------------------
+      // VALID DATE
+      // ------------------------------------------------------
 
       setDate(date);
 
@@ -340,13 +423,17 @@ const Calendar = ({
     ],
   );
 
-  /* ==========================================================
-     DATE CELL
-     ========================================================== */
+  // ==========================================================
+  // DATE CELL
+  // ==========================================================
 
   const renderDateCell = useCallback(
     (dayData) => {
       const { day, isCurrentMonth } = dayData;
+
+      // ------------------------------------------------------
+      // OUTSIDE CURRENT MONTH
+      // ------------------------------------------------------
 
       if (!isCurrentMonth) {
         return (
@@ -354,9 +441,9 @@ const Calendar = ({
         );
       }
 
-      /* -----------------------------------------------
-         DATE STATUS
-         ----------------------------------------------- */
+      // ------------------------------------------------------
+      // DATE STATUS
+      // ------------------------------------------------------
 
       const isBooked = isDateBooked(day);
 
@@ -364,32 +451,31 @@ const Calendar = ({
 
       const isPast = isPastDate(year, month, day);
 
-      /* -----------------------------------------------
-         STATUS CLASS
-         ----------------------------------------------- */
-
       let statusClass = "";
 
       if (isBooked) {
-        statusClass =
-          orderStatus === "complete"
-            ? "isBooked"
-            : orderStatus === "cancel"
-              ? "isCanceled"
-              : orderStatus === "pending"
-                ? "isPending"
-                : "";
+        if (orderStatus === "complete") {
+          statusClass = "isBooked";
+        } else if (orderStatus === "cancel") {
+          statusClass = "isCanceled";
+        } else if (orderStatus === "pending") {
+          statusClass = "isPending";
+        }
       }
+
+      // ------------------------------------------------------
+      // RENDER
+      // ------------------------------------------------------
 
       return (
         <div
           key={`${year}-${month}-${day}`}
           className={`
-            date
-            ${isToday ? "isCurrentDay" : ""}
-            ${isPast ? "isPastDate" : ""}
-            ${statusClass}
-          `}
+              date
+              ${isToday ? "isCurrentDay" : ""}
+              ${isPast ? "isPastDate" : ""}
+              ${statusClass}
+            `}
           onClick={() => {
             if (!isPast) {
               selectDate(day);
@@ -404,7 +490,7 @@ const Calendar = ({
               : `${day} ${monthName} ${year}`
           }
         >
-          {formatNumber(day)}
+          {day}
 
           {isBooked && <span className="date__statusDot" aria-hidden="true" />}
         </div>
@@ -418,15 +504,14 @@ const Calendar = ({
       isPastDate,
       orderStatus,
       selectDate,
-      formatNumber,
       monthName,
       statusText,
     ],
   );
 
-  /* ==========================================================
-     STATUS CONFIG
-     ========================================================== */
+  // ==========================================================
+  // STATUS CONFIG
+  // ==========================================================
 
   const statusConfig = useMemo(() => {
     if (!orderStatus) {
@@ -453,61 +538,65 @@ const Calendar = ({
     return config[orderStatus] || null;
   }, [orderStatus, statusText]);
 
-  /* ==========================================================
-     RENDER
-     ========================================================== */
+  // ==========================================================
+  // RENDER
+  // ==========================================================
 
   return (
     <div className={`calendar calendar--${lang}`} lang={lang}>
       {/* ======================================================
           HEADER
-          ====================================================== */}
+      ====================================================== */}
 
       <div className="calendar__header">
+        {/* PREVIOUS YEAR */}
+
         <button
           type="button"
           onClick={handlePrevYear}
-          className="
-            calendar__nav
-            calendar__nav--year
-          "
-          aria-label={lang === "hi" ? "पिछला वर्ष" : "Previous year"}
+          className="calendar__nav calendar__nav--year"
+          aria-label={statusText.previousYear}
         >
           &lt;&lt;
         </button>
+
+        {/* PREVIOUS MONTH */}
 
         <button
           type="button"
           onClick={handlePrevMonth}
           className="calendar__nav"
-          aria-label={lang === "hi" ? "पिछला महीना" : "Previous month"}
+          aria-label={statusText.previousMonth}
         >
           &lt;
         </button>
 
+        {/* MONTH */}
+
         <div className="calendar__title" aria-label={`${monthName} ${year}`}>
           <span className="calendar__month">{monthName}</span>
 
-          <span className="calendar__year">{formatNumber(year)}</span>
+          <span className="calendar__year">{year}</span>
         </div>
+
+        {/* NEXT MONTH */}
 
         <button
           type="button"
           onClick={handleNextMonth}
           className="calendar__nav"
-          aria-label={lang === "hi" ? "अगला महीना" : "Next month"}
+          aria-label={statusText.nextMonth}
         >
           &gt;
         </button>
 
+        {/* NEXT YEAR */}
+
         <button
           type="button"
           onClick={handleNextYear}
-          className="
-            calendar__nav
-            calendar__nav--year
-          "
-          aria-label={lang === "hi" ? "अगला वर्ष" : "Next year"}
+          className="calendar__nav calendar__nav--year"
+          aria-label={statusText.nextYear}
         >
           &gt;&gt;
         </button>
@@ -515,37 +604,36 @@ const Calendar = ({
 
       {/* ======================================================
           CALENDAR BODY
-          ====================================================== */}
+      ====================================================== */}
 
       <div className="calendar__body">
+        {/* WEEKDAYS */}
+
         {daysOfWeek.map((day) => (
           <div key={day} className="calendar__weekday">
             {day}
           </div>
         ))}
 
-        {calendar.map((week, weekIndex) => (
-          <React.Fragment key={`week-${weekIndex}`}>
-            {week.map((dayData) => renderDateCell(dayData))}
-          </React.Fragment>
-        ))}
+        {/* DATES */}
+
+        {Array.isArray(calendar) &&
+          calendar.map((week, weekIndex) => (
+            <React.Fragment key={`week-${weekIndex}`}>
+              {Array.isArray(week) && week.map((dayData) => renderDateCell(dayData))}
+            </React.Fragment>
+          ))}
       </div>
 
       {/* ======================================================
           LEGEND
-          ====================================================== */}
+      ====================================================== */}
 
       <div className="calendar__legend">
         {/* TODAY */}
 
         <div className="calendar__legendItem">
-          <span
-            className="
-              calendar__legend-dot
-              calendar__legend-dot--today
-            "
-            aria-hidden="true"
-          />
+          <span className="calendar__legend-dot calendar__legend-dot--today" aria-hidden="true" />
 
           <span>{statusText.today}</span>
         </div>
@@ -554,13 +642,7 @@ const Calendar = ({
 
         {statusConfig && (
           <div className="calendar__legendItem">
-            <span
-              className={`
-                calendar__legend-dot
-                ${statusConfig.className}
-              `}
-              aria-hidden="true"
-            />
+            <span className={`calendar__legend-dot ${statusConfig.className}`} aria-hidden="true" />
 
             <span>{statusConfig.text}</span>
           </div>
@@ -570,4 +652,4 @@ const Calendar = ({
   );
 };
 
-export default React.memo(Calendar);
+export default Calendar;

@@ -25,6 +25,7 @@ export default function VendorListItem({
   year,
   booked_date,
   jobType,
+  jobTypeHindi,
   token,
   category,
   bookingHappen,
@@ -95,6 +96,8 @@ export default function VendorListItem({
       year: "numeric",
     });
 
+    const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
     const vendorInitial = data.name?.charAt(0)?.toUpperCase() || "V";
     const ratingStars = "⭐".repeat(Math.round(data.rating || 1));
 
@@ -118,9 +121,10 @@ export default function VendorListItem({
           <div class="summary-details">
             <div class="detail-item">
               <div class="detail-icon">🔧</div>
-              <div class="detail-content">
-                <span class="detail-label">${t("Service", "सेवा")}</span>
-                <span class="detail-value">${data.type.toUpperCase()}</span>
+              <div class="detail-content"><span class="detail-label">${t("Service", "सेवा")}</span>
+<span class="detail-value">
+  ${lang === "hin" ? jobTypeHindi : data.type?.toUpperCase()}
+</span>
               </div>
             </div>
             
@@ -375,7 +379,10 @@ export default function VendorListItem({
                 <span className="modal-icon">⭐</span>
                 <div>
                   <h2>
-                    {t("Reviews for", "के लिए समीक्षाएँ")} {data.name?.toUpperCase() || "Vendor"}
+                    {t(
+                      `Reviews for ${data.name?.toUpperCase()} Vendor`,
+                      `${data.name?.toUpperCase()} के लिए समीक्षाएँ`,
+                    )}
                   </h2>
                   {totalReviews > 0 && (
                     <div className="modal-rating-summary">
@@ -483,7 +490,7 @@ export default function VendorListItem({
 
                       <div className="review-body-modern">
                         <p className="review-text-modern">
-                          {review.review || t("No review text", "कोई समीक्षा पाठ नहीं")}
+                          {review.review || t("No review text", "कोई समीक्षा नहीं")}
                         </p>
                       </div>
 

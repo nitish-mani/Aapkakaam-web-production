@@ -1,0 +1,529 @@
+/* ============================================================
+   MAINTENANCE PAGE
+============================================================ */
+
+.maintenance-page {
+  position: relative;
+
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 80px 24px 30px;
+
+  box-sizing: border-box;
+  overflow: hidden;
+
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.1), transparent 35%),
+    radial-gradient(circle at bottom left, rgba(37, 99, 235, 0.08), transparent 35%), #f7f9fc;
+}
+
+/* ============================================================
+   LANGUAGE SWITCH
+============================================================ */
+
+/* .language-switch {
+  position: fised;
+
+  top: 22px;
+  right: 24px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 4px;
+
+  gap: 3px;
+
+  background: rgba(255, 255, 255, 0.9);
+
+  border: 1px solid #e2e6ee;
+
+  border-radius: 50px;
+
+  box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
+
+  backdrop-filter: blur(12px);
+
+  z-index: 10;
+} */
+
+/* .language-switch button {
+  min-width: 44px;
+  height: 34px;
+
+  padding: 0 11px;
+
+  border: none;
+  outline: none;
+
+  border-radius: 50px;
+
+  background: transparent;
+
+  color: #64748b;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+} */
+
+.language-switch button:hover {
+  color: #2563eb;
+
+  background: rgba(37, 99, 235, 0.07);
+}
+
+.language-switch button.active {
+  color: #ffffff;
+
+  background: #2563eb;
+
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
+}
+
+.language-switch button:active {
+  transform: scale(0.94);
+}
+
+/* ============================================================
+   MAINTENANCE CARD
+============================================================ */
+
+.maintenance-card {
+  position: relative;
+
+  width: 100%;
+  max-width: 560px;
+
+  padding: 44px 36px;
+
+  text-align: center;
+
+  background: rgba(255, 255, 255, 0.96);
+
+  border: 1px solid #e7eaf0;
+
+  border-radius: 28px;
+
+  box-shadow: 0 25px 70px rgba(15, 23, 42, 0.1);
+
+  box-sizing: border-box;
+
+  animation: maintenanceCardIn 0.55s ease both;
+}
+
+/* ============================================================
+   ICON
+============================================================ */
+
+.maintenance-icon {
+  width: 110px;
+  height: 110px;
+
+  margin: 0 auto 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  font-size: 48px;
+
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.14), rgba(37, 99, 235, 0.06));
+
+  border: 1px solid rgba(37, 99, 235, 0.1);
+
+  box-shadow:
+    0 0 0 18px rgba(37, 99, 235, 0.04),
+    0 15px 35px rgba(37, 99, 235, 0.1);
+
+  animation: maintenanceIconFloat 3s ease-in-out infinite;
+}
+
+/* ============================================================
+   BADGE
+============================================================ */
+
+.maintenance-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 8px 15px;
+
+  margin-bottom: 20px;
+
+  border-radius: 50px;
+
+  color: #2563eb;
+
+  background: rgba(37, 99, 235, 0.09);
+
+  border: 1px solid rgba(37, 99, 235, 0.18);
+
+  font-size: 12px;
+  font-weight: 800;
+
+  letter-spacing: 1.2px;
+}
+
+.maintenance-badge span {
+  width: 8px;
+  height: 8px;
+
+  flex: 0 0 8px;
+
+  border-radius: 50%;
+
+  background: #2563eb;
+
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+
+  animation: maintenancePulse 1.8s ease-in-out infinite;
+}
+
+/* ============================================================
+   TITLE
+============================================================ */
+
+.maintenance-card h1 {
+  margin: 0;
+
+  color: #111827;
+
+  font-size: clamp(30px, 5vw, 40px);
+
+  line-height: 1.15;
+
+  font-weight: 900;
+
+  letter-spacing: -1px;
+}
+
+/* ============================================================
+   SUBTITLE
+============================================================ */
+
+.maintenance-subtitle {
+  margin: 14px 0 0;
+
+  color: #2563eb;
+
+  font-size: 18px;
+
+  line-height: 1.5;
+
+  font-weight: 700;
+}
+
+/* ============================================================
+   MESSAGE
+============================================================ */
+
+.maintenance-message {
+  margin: 16px auto 0;
+
+  max-width: 470px;
+
+  color: #64748b;
+
+  font-size: 15px;
+
+  line-height: 1.7;
+}
+
+/* ============================================================
+   INFORMATION BOX
+============================================================ */
+
+.maintenance-info {
+  margin-top: 30px;
+
+  padding: 20px;
+
+  text-align: left;
+
+  border-radius: 22px;
+
+  background: #ffffff;
+
+  border: 1px solid #e7eaf0;
+
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.06);
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 14px;
+}
+
+.info-row + .info-row {
+  margin-top: 20px;
+}
+
+.info-icon {
+  width: 46px;
+  height: 46px;
+
+  flex: 0 0 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 14px;
+
+  background: rgba(37, 99, 235, 0.09);
+
+  font-size: 20px;
+}
+
+.info-row strong {
+  display: block;
+
+  color: #111827;
+
+  font-size: 15px;
+
+  font-weight: 800;
+}
+
+.info-row span {
+  display: block;
+
+  margin-top: 4px;
+
+  color: #64748b;
+
+  font-size: 13px;
+
+  line-height: 1.5;
+}
+
+/* ============================================================
+   FOOTER
+============================================================ */
+
+.maintenance-footer {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  margin-top: 28px;
+
+  color: #64748b;
+
+  font-size: 13px;
+}
+
+.maintenance-footer strong {
+  color: #111827;
+
+  font-size: 15px;
+
+  font-weight: 800;
+}
+
+/* ============================================================
+   ANIMATIONS
+============================================================ */
+
+@keyframes maintenanceCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes maintenanceIconFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes maintenancePulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.55;
+    transform: scale(0.82);
+  }
+}
+
+/* ============================================================
+   TABLET
+============================================================ */
+
+@media (max-width: 768px) {
+  .maintenance-page {
+    padding: 75px 18px 24px;
+  }
+
+  .maintenance-card {
+    padding: 38px 28px;
+
+    border-radius: 24px;
+  }
+
+  .maintenance-icon {
+    width: 100px;
+    height: 100px;
+
+    font-size: 44px;
+  }
+}
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 600px) {
+  .maintenance-page {
+    align-items: flex-start;
+
+    padding: 72px 14px 20px;
+  }
+
+  .language-switch {
+    top: 16px;
+    right: 14px;
+  }
+
+  .maintenance-card {
+    padding: 32px 20px;
+
+    border-radius: 22px;
+  }
+
+  .maintenance-icon {
+    width: 92px;
+    height: 92px;
+
+    margin-bottom: 24px;
+
+    font-size: 40px;
+  }
+
+  .maintenance-card h1 {
+    font-size: 30px;
+
+    letter-spacing: -0.7px;
+  }
+
+  .maintenance-subtitle {
+    font-size: 16px;
+  }
+
+  .maintenance-message {
+    font-size: 14px;
+
+    line-height: 1.65;
+  }
+
+  .maintenance-info {
+    padding: 16px;
+  }
+
+  .info-row {
+    gap: 11px;
+  }
+
+  .info-icon {
+    width: 42px;
+    height: 42px;
+
+    flex-basis: 42px;
+
+    border-radius: 12px;
+
+    font-size: 18px;
+  }
+
+  .info-row strong {
+    font-size: 14px;
+  }
+
+  .info-row span {
+    font-size: 12px;
+  }
+}
+
+/* ============================================================
+   VERY SMALL DEVICES
+============================================================ */
+
+@media (max-width: 380px) {
+  .maintenance-page {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .maintenance-card {
+    padding: 28px 16px;
+  }
+
+  .maintenance-card h1 {
+    font-size: 27px;
+  }
+
+  .maintenance-icon {
+    width: 82px;
+    height: 82px;
+
+    font-size: 36px;
+  }
+
+  .language-switch button {
+    min-width: 40px;
+
+    padding: 0 9px;
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITY
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .maintenance-card,
+  .maintenance-icon,
+  .maintenance-badge span {
+    animation: none;
+  }
+
+  .language-switch button {
+    transition: none;
+  }
+}

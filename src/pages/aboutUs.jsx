@@ -77,8 +77,9 @@ const AboutUs = () => {
             <h3>{t("Our Freemium Model", "हमारा फ्रीमियम मॉडल")}</h3>
             <p>
               {t(
-                "Vendors get the first 5 service bookings free of commission to help grow their business. After that, a nominal commission per order applies based on the service type. We also offer a 'Share and Earn' program where users can earn rewards by sharing our platform with others.",
-                "विक्रेताओं को अपने व्यवसाय को बढ़ाने में मदद करने के लिए पहली 5 सेवा बुकिंग कमीशन मुफ्त मिलती है। उसके बाद, सेवा प्रकार के आधार पर प्रति ऑर्डर एक नाममात्र कमीशन लागू होता है। हम 'शेयर और कमाएं' कार्यक्रम भी प्रदान करते हैं जहां उपयोगकर्ता हमारे प्लेटफॉर्म को दूसरों के साथ साझा करके पुरस्कार अर्जित कर सकते हैं।",
+                "Vendors get the first 5 service bookings free of commission to help grow their business. But at the time of signup service providers pay 50 rupees joining fee and that amount added to their wallet. After that, a nominal commission per order applies based on the service type. We also offer a 'Share and Earn' program where users can earn rewards by sharing our platform with others.",
+
+                "विक्रेताओं को अपने व्यवसाय को बढ़ाने में मदद करने के लिए पहली 5 सेवा बुकिंग कमीशन मुफ्त मिलती है। लेकिन साइनअप के समय सेवा प्रदाता 50 रुपये ज्वाइनिंग फीस का भुगतान करते हैं और यह राशि उनके वॉलेट में जोड़ दी जाती है। उसके बाद, सेवा प्रकार के आधार पर प्रति ऑर्डर एक नाममात्र कमीशन लागू होता है। हम 'शेयर और कमाएं' कार्यक्रम भी प्रदान करते हैं जहां उपयोगकर्ता हमारे प्लेटफॉर्म को दूसरों के साथ साझा करके पुरस्कार अर्जित कर सकते हैं।",
               )}
             </p>
           </div>

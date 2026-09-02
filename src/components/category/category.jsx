@@ -1,4 +1,5 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setCategory } from "../../utils/categoryslice";
 import "./category.css";
@@ -26,10 +27,21 @@ const RightArrowIcon = () => (
 export default function Category() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
   const { cd, id } = useParams();
 
   // Get language from Redux store
   const lang = useSelector((store) => store.category?.selectLanguage || "en");
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "instant",
+    });
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  }, []);
 
   const handleLogin = (userType) => {
     dispatch(setCategory(userType));
@@ -39,6 +51,9 @@ export default function Category() {
         category: userType,
         cd,
         id,
+        // Pass the selected service data if it exists
+        selectedService: location.state?.selectedService || null,
+        categoryName: location.state?.category || null,
       },
     });
   };
@@ -66,6 +81,10 @@ export default function Category() {
     },
   ];
 
+  // Check if there's a selected service from navigation state
+  const selectedService = location.state?.selectedService;
+  const categoryName = location.state?.category;
+
   return (
     <div className="category-modern">
       <AdsterraBanner_320x50 />
@@ -86,6 +105,16 @@ export default function Category() {
               ? "Aapkakaam का उपयोग कैसे करना चाहते हैं, चुनें"
               : "Select how you want to use Aapkakaam"}
           </p>
+
+          {categoryName && !selectedService && (
+            <div className="category-selected-service">
+              <span>📂</span>
+              <div>
+                <strong>{categoryName}</strong>
+                <small>श्रेणी</small>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Options Grid */}

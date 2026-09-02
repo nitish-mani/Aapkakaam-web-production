@@ -37,8 +37,9 @@ const TermsAndConditions = () => {
       title: t("Vendor Commission and Balance", "विक्रेता कमीशन और बैलेंस"),
       items: [
         t(
-          "Vendors receive the first 5 service orders free. Thereafter, a commission ranging from ₹30 to ₹100 per order applies. No refunds will be issued for canceled orders. Vendors must maintain a sufficient balance to continue using our services. Failure to do so may result in suspension of vendor services. User will pay ₹10 from balance Amount. First 5 service booking is free because that required amount is given at signup. User will not get ₹10 of balance amount for Canceled orders by user-(who booked any service).",
-          "विक्रेताओं को पहले 5 सेवा ऑर्डर मुफ्त मिलते हैं। उसके बाद, प्रति ऑर्डर ₹30 से ₹100 तक का कमीशन लागू होता है। रद्द किए गए ऑर्डर के लिए कोई रिफंड जारी नहीं किया जाएगा। विक्रेताओं को हमारी सेवाओं का उपयोग जारी रखने के लिए पर्याप्त बैलेंस बनाए रखना होगा। ऐसा करने में विफलता के परिणामस्वरूप विक्रेता सेवाएं निलंबित हो सकती हैं। उपयोगकर्ता बैलेंस राशि से ₹10 का भुगतान करेगा। पहली 5 सेवा बुकिंग मुफ्त है क्योंकि वह आवश्यक राशि साइनअप पर दी जाती है। उपयोगकर्ता द्वारा रद्द किए गए ऑर्डर के लिए उपयोगकर्ता को ₹10 की बैलेंस राशि नहीं मिलेगी।",
+          "Vendors receive the first 5 service orders free but at the time of signup they pay 50 rupees as a joining fee. Thereafter, a commission of 50 rupees per order applies in accordance with discount they get when they recharge wallet. No refunds will be issued for canceled orders. Vendors must maintain a sufficient balance to continue using our services. Failure to do so may result in suspension of vendor services. User will pay ₹10 from balance Amount. First 5 service booking is free because that required amount is given at signup. User will not get ₹10 of balance amount for Canceled orders by user-(who booked any service).",
+
+          "विक्रेताओं को पहले 5 सेवा ऑर्डर मुफ्त मिलते हैं लेकिन साइनअप के समय वे 50 रुपये ज्वाइनिंग फीस का भुगतान करते हैं। उसके बाद, प्रति ऑर्डर ₹50 का कमीशन लागू होता है जो वॉलेट रिचार्ज करते समय मिलने वाली छूट के अनुसार होता है। रद्द किए गए ऑर्डर के लिए कोई रिफंड जारी नहीं किया जाएगा। विक्रेताओं को हमारी सेवाओं का उपयोग जारी रखने के लिए पर्याप्त बैलेंस बनाए रखना होगा। ऐसा करने में विफलता के परिणामस्वरूप विक्रेता सेवाएं निलंबित हो सकती हैं। उपयोगकर्ता बैलेंस राशि से ₹10 का भुगतान करेगा। पहली 5 सेवा बुकिंग मुफ्त है क्योंकि वह आवश्यक राशि साइनअप पर दी जाती है। उपयोगकर्ता द्वारा रद्द किए गए ऑर्डर के लिए उपयोगकर्ता को ₹10 की बैलेंस राशि नहीं मिलेगी।",
         ),
       ],
     },
@@ -47,8 +48,9 @@ const TermsAndConditions = () => {
       title: t("Share & Earn Program", "शेयर और कमाएं कार्यक्रम"),
       items: [
         t(
-          "Users or Vendors sharing referral links can earn between ₹1.5 and ₹5 or 5% of the commission the company receives from vendors on completed orders after the first 5 free orders. Canceled orders do not count towards referral earnings. Earnings may be affected due to discount given to vendors and users. It will be based on discounted percentage. Daily attendance is mandatory - 6 minutes total per day and 2 minutes on each three pages (Home Page, Share Page, View Share Page) with 100% to qualify for withdraw.",
-          "संदर्भ लिंक साझा करने वाले उपयोगकर्ता या विक्रेता पहले 5 मुफ्त ऑर्डर के बाद पूर्ण ऑर्डर पर कंपनी को विक्रेताओं से मिलने वाले कमीशन का ₹1.5 से ₹5 या 5% तक कमा सकते हैं। रद्द किए गए ऑर्डर रेफरल कमाई में नहीं गिने जाते हैं। विक्रेताओं और उपयोगकर्ताओं को दी गई छूट के कारण कमाई प्रभावित हो सकती है। यह छूट प्रतिशत पर आधारित होगी। दैनिक उपस्थिति अनिवार्य है - प्रति दिन कुल 6 मिनट और तीन पृष्ठों (होम पेज, शेयर पेज, व्यू शेयर पेज) पर 2 मिनट 100% के साथ निकासी के लिए योग्य होने के लिए।",
+          "Users sharing links via their accounts earn ₹1.5 to ₹5 or 5% of company commission from each completed order beyond the first 5 free orders. Only completed orders count; canceled orders do not contribute to earnings. First 1000 completed orders per month they get 10 rupees per order after that 5% is applied. Earnings may be affected due to discount given to vendors and users. It will be based on discounted percentage.",
+
+          "अपने खातों के माध्यम से लिंक साझा करने वाले उपयोगकर्ता पहले 5 मुफ्त ऑर्डर से परे प्रत्येक पूर्ण ऑर्डर से ₹1.5 से ₹5 या कंपनी कमीशन का 5% कमाते हैं। केवल पूर्ण किए गए ऑर्डर गिने जाते हैं; रद्द किए गए ऑर्डर कमाई में योगदान नहीं करते हैं। प्रति माह पहले 1000 पूर्ण ऑर्डर पर उन्हें प्रति ऑर्डर 10 रुपये मिलते हैं, उसके बाद 5% लागू होता है। विक्रेताओं और उपयोगकर्ताओं को दी गई छूट के कारण कमाई प्रभावित हो सकती है। यह छूट प्रतिशत पर आधारित होगी।",
         ),
       ],
     },

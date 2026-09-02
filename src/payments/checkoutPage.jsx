@@ -196,7 +196,7 @@ const DiscountCard = () => {
       setLoadingIndex(null);
 
       const options = {
-        key: "rzp_test_THfazRmCIeemjt",
+        key: "rzp_live_ymm3SOr7DUIJiM",
         amount: order.amount,
         currency: order.currency,
         name: "Aapkakaam",

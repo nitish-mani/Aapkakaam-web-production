@@ -204,7 +204,7 @@ export default function CheckBookingDate() {
             <span>{getServiceEmoji()}</span>
           </div>
           <div className="booking-header-content">
-            <h1>📅 Check Booking Date</h1>
+            <h1>📅 {lang === "hin" ? "बुकिंग की तारीख देखें" : "Check Booking Date"}</h1>
             <div className="booking-service-info">
               <h2>{getServiceTitle()}</h2>
               <span className="booking-location">
