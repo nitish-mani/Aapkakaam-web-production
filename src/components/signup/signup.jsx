@@ -75,6 +75,7 @@ export default function SignUp() {
     isOtpSent: false,
     isEyeClicked: false,
     verifyPhoneNo: false,
+    isSignupComplete: false,
   });
 
   const [messages, setMessages] = useState({
@@ -395,90 +396,165 @@ export default function SignUp() {
   // SIGNUP
   // ============================================================
 
+  const _t = useCallback(
+    (en, hin) => {
+      return lang === "hin" ? hin : en;
+    },
+    [lang],
+  );
+
   const handleSignup = useCallback(async () => {
     if (uiState.isLoading) return;
 
+    // ============================================================
+    // VALIDATION - NAME
+    // ============================================================
+
     if (!formData.name.trim()) {
       setValidation((prev) => ({ ...prev, isNameEmpty: false }));
+      showError(_t("Please enter your full name", "कृपया अपना पूरा नाम दर्ज करें"));
       return;
     }
 
-    if (!/^\d{10}$/.test(String(formData.phoneNo))) {
+    // ============================================================
+    // VALIDATION - MOBILE NUMBER (10 digits)
+    // ============================================================
+
+    const phoneStr = String(formData.phoneNo).trim();
+
+    if (!phoneStr) {
       setValidation((prev) => ({ ...prev, isNumValid: false }));
+      showError(_t("Please enter your mobile number", "कृपया अपना मोबाइल नंबर दर्ज करें"));
       return;
     }
 
-    if (formData.pass.length <= 5) {
-      setValidation((prev) => ({
-        ...prev,
-        isPassValid: false,
-        isValidPass: false,
-      }));
+    if (!/^\d{10}$/.test(phoneStr)) {
+      setValidation((prev) => ({ ...prev, isNumValid: false }));
+      showError(
+        _t(
+          "Please enter a valid 10-digit mobile number",
+          "कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें",
+        ),
+      );
       return;
     }
+
+    // ============================================================
+    // VALIDATION - PASSWORD
+    // ============================================================
+
+    if (!formData.pass) {
+      setValidation((prev) => ({ ...prev, isPassValid: false, isValidPass: false }));
+      showError(_t("Please enter your password", "कृपया अपना पासवर्ड दर्ज करें"));
+      return;
+    }
+
+    if (formData.pass.length < 6) {
+      setValidation((prev) => ({ ...prev, isPassValid: false, isValidPass: false }));
+      showError(
+        _t("Password must be at least 6 characters", "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए"),
+      );
+      return;
+    }
+
+    // ============================================================
+    // VALIDATION - CONFIRM PASSWORD
+    // ============================================================
 
     if (formData.pass !== formData.rePass) {
       setValidation((prev) => ({ ...prev, isRePassMatch: false }));
+      showError(_t("Passwords do not match", "पासवर्ड मैच नहीं हो रहा है"));
       return;
     }
 
-    if (category === "vendor" && (!Array.isArray(formData.jobs) || formData.jobs.length === 0)) {
-      showMessage(
-        "err",
-        lang === "hin" ? "कृपया कम से कम एक काम चुनें" : "Please select at least one job",
-      );
-      return;
-    }
-
-    if (category === "vendor" && formData.jobs.length > MAX_JOBS) {
-      showMessage(
-        "err",
-        lang === "hin"
-          ? `आप अधिकतम ${MAX_JOBS} काम चुन सकते हैं`
-          : `You can select a maximum of ${MAX_JOBS} jobs`,
-      );
-      return;
-    }
+    // ============================================================
+    // VALIDATION - GENDER
+    // ============================================================
 
     if (!formData.gender) {
       setValidation((prev) => ({ ...prev, isGender: false }));
+      showError(_t("Please select your gender", "कृपया अपना लिंग चुनें"));
       return;
     }
 
+    // ============================================================
+    // VALIDATION - JOBS (Vendor only)
+    // ============================================================
+
+    if (category === "vendor") {
+      const jobs = formData.jobs?.filter((job) => job && job.trim()) || [];
+
+      if (jobs.length === 0) {
+        showError(_t("Please select at least one job", "कृपया कम से कम एक काम चुनें"));
+        return;
+      }
+
+      if (jobs.length > MAX_JOBS) {
+        showError(
+          _t(
+            `You can select a maximum of ${MAX_JOBS} jobs`,
+            `आप अधिकतम ${MAX_JOBS} काम चुन सकते हैं`,
+          ),
+        );
+        return;
+      }
+      const experience = Number(formData.experience);
+
+      if (isNaN(experience) || experience < 0) {
+        showError(_t("Please enter a valid experience", "कृपया वैध अनुभव दर्ज करें"));
+        return;
+      }
+    }
+
+    // ============================================================
+    // VALIDATION - TERMS & CONDITIONS
+    // ============================================================
+
     if (!agreed) {
-      showMessage(
-        "err",
-        lang === "hin"
-          ? "आपको नियम एवं शर्तें और गोपनीयता नीति स्वीकार करनी होगी"
-          : "You must accept the Terms & Conditions and Privacy Policy",
+      showError(
+        _t(
+          "You must accept the Terms & Conditions and Privacy Policy",
+          "आपको नियम एवं शर्तें और गोपनीयता नीति स्वीकार करनी होगी",
+        ),
       );
       return;
     }
 
+    // ============================================================
+    // VALIDATION - INTERNET
+    // ============================================================
+
     if (!navigator.onLine) {
-      showMessage("err", lang === "hin" ? "आप ऑफलाइन हैं" : "You are offline");
+      showError(_t("You are offline", "आप ऑफलाइन हैं"));
       return;
     }
+
+    // ============================================================
+    // LOADING
+    // ============================================================
 
     setUiState((prev) => ({ ...prev, isLoading: true }));
 
     try {
+      // ============================================================
+      // VENDOR SIGNUP WITH PAYMENT
+      // ============================================================
+
       if (category === "vendor") {
         const jobs = [
           ...new Set(formData.jobs.map((job) => String(job || "").trim()).filter(Boolean)),
         ];
 
         if (jobs.length === 0) {
-          throw new Error(
-            lang === "hin" ? "कृपया कम से कम एक काम चुनें" : "Please select at least one job",
-          );
+          throw new Error(_t("Please select at least one job", "कृपया कम से कम एक काम चुनें"));
         }
 
         if (jobs.length > MAX_JOBS) {
           throw new Error(
-            lang === "hin"
-              ? `आप अधिकतम ${MAX_JOBS} काम चुन सकते हैं`
-              : `You can select a maximum of ${MAX_JOBS} jobs`,
+            _t(
+              `You can select a maximum of ${MAX_JOBS} jobs`,
+              `आप अधिकतम ${MAX_JOBS} काम चुन सकते हैं`,
+            ),
           );
         }
 
@@ -502,16 +578,14 @@ export default function SignUp() {
         if (!response.data?.success || !response.data?.order || !response.data?.signupToken) {
           throw new Error(
             response.data?.message ||
-              (lang === "hin"
-                ? "भुगतान ऑर्डर बनाने में समस्या हुई"
-                : "Unable to create payment order"),
+              _t("Unable to create payment order", "भुगतान ऑर्डर बनाने में समस्या हुई"),
           );
         }
 
         const { order, signupToken } = response.data;
 
         if (typeof window === "undefined" || !window.Razorpay) {
-          throw new Error(lang === "hin" ? "Razorpay लोड नहीं हुआ है" : "Razorpay is not loaded");
+          throw new Error(_t("Razorpay is not loaded", "Razorpay लोड नहीं हुआ है"));
         }
 
         const razorpayOptions = {
@@ -519,8 +593,7 @@ export default function SignUp() {
           amount: order.amount,
           currency: order.currency || "INR",
           name: "Aapkakaam",
-          description:
-            lang === "hin" ? "वेंडर रजिस्ट्रेशन शुल्क ₹50" : "Vendor Registration Fee ₹50",
+          description: _t("Vendor Registration Fee ₹50", "वेंडर रजिस्ट्रेशन शुल्क ₹50"),
           order_id: order.id,
           prefill: {
             name: formData.name.trim(),
@@ -538,9 +611,7 @@ export default function SignUp() {
                 !paymentResponse?.razorpay_order_id ||
                 !paymentResponse?.razorpay_signature
               ) {
-                throw new Error(
-                  lang === "hin" ? "अमान्य भुगतान प्रतिक्रिया" : "Invalid payment response",
-                );
+                throw new Error(_t("Invalid payment response", "अमान्य भुगतान प्रतिक्रिया"));
               }
 
               const verifyResponse = await axios.post(
@@ -558,29 +629,27 @@ export default function SignUp() {
 
               if (!data?.success) {
                 throw new Error(
-                  data?.message ||
-                    (lang === "hin" ? "भुगतान सत्यापन विफल" : "Payment verification failed"),
+                  data?.message || _t("Payment verification failed", "भुगतान सत्यापन विफल"),
                 );
               }
 
-              showMessage(
-                "success",
-                lang === "hin"
-                  ? "₹50 भुगतान सफल! आपका वेंडर अकाउंट बन गया है और ₹50 बैलेंस में जोड़ दिए गए हैं।"
-                  : "₹50 payment successful! Your vendor account has been created and ₹50 has been added to your balance.",
+              showSuccess(
+                _t(
+                  "₹50 payment successful! Your vendor account has been created and ₹50 has been added to your balance.",
+                  "₹50 भुगतान सफल! आपका वेंडर अकाउंट बन गया है और ₹50 बैलेंस में जोड़ दिए गए हैं।",
+                ),
                 3500,
               );
-
+              isSignupComplete = true;
               setTimeout(() => {
                 navigate("/login", { state: { category: "vendor" } });
               }, 3500);
             } catch (error) {
               console.error("Vendor signup payment verification error:", error);
-              showMessage(
-                "err",
+              showError(
                 error?.response?.data?.message ||
                   error?.message ||
-                  (lang === "hin" ? "भुगतान सत्यापन विफल" : "Payment verification failed"),
+                  _t("Payment verification failed", "भुगतान सत्यापन विफल"),
               );
               setUiState((prev) => ({ ...prev, isLoading: false }));
             }
@@ -589,7 +658,7 @@ export default function SignUp() {
           modal: {
             ondismiss: () => {
               setUiState((prev) => ({ ...prev, isLoading: false }));
-              showMessage("err", lang === "hin" ? "भुगतान रद्द कर दिया गया" : "Payment cancelled");
+              showError(_t("Payment cancelled", "भुगतान रद्द कर दिया गया"));
             },
           },
         };
@@ -599,16 +668,16 @@ export default function SignUp() {
         razorpay.on("payment.failed", (response) => {
           console.error("Vendor signup payment failed:", response);
           setUiState((prev) => ({ ...prev, isLoading: false }));
-          showMessage(
-            "err",
-            response?.error?.description ||
-              (lang === "hin" ? "भुगतान विफल हो गया" : "Payment failed"),
-          );
+          showError(response?.error?.description || _t("Payment failed", "भुगतान विफल हो गया"));
         });
 
         razorpay.open();
         return;
       }
+
+      // ============================================================
+      // USER SIGNUP
+      // ============================================================
 
       const result = await axios.post(
         `${SERVER_URL}/${category}/signup`,
@@ -618,7 +687,7 @@ export default function SignUp() {
           password: formData.pass,
           sharedBy: id || "",
           gender: formData.gender,
-          type: formData.jobs,
+          type: formData.jobs || [],
           experience: Number(formData.experience) || 0,
           cd: cd || "",
           validPhoneNoId: validPhoneNoId || "",
@@ -627,23 +696,14 @@ export default function SignUp() {
         { headers: { "Content-Type": "application/json" }, timeout: 15000 },
       );
 
-      showMessage(
-        "success",
-        result.data?.message || (lang === "hin" ? "साइनअप सफल" : "Signup successful"),
-        2000,
-      );
-
+      showSuccess(result.data?.message || _t("Signup successful", "साइनअप सफल"));
+      isSignupComplete = true;
       setTimeout(() => {
         navigate("/login", { state: { category } });
       }, 2000);
     } catch (err) {
       console.error("Signup error:", err);
-      showMessage(
-        "err",
-        err?.response?.data?.message ||
-          err?.message ||
-          (lang === "hin" ? "साइनअप विफल" : "Signup failed"),
-      );
+      showError(err?.response?.data?.message || err?.message || _t("Signup failed", "साइनअप विफल"));
       setUiState((prev) => ({ ...prev, isLoading: false }));
     }
   }, [
@@ -653,11 +713,14 @@ export default function SignUp() {
     cd,
     validPhoneNoId,
     navigate,
-    showMessage,
-    lang,
+    showError,
+    showSuccess,
     agreed,
     uiState.isLoading,
+    _t,
+    MAX_JOBS,
   ]);
+  // Add this after isHindi declaration
 
   // ============================================================
   // LOGIN
@@ -736,7 +799,9 @@ export default function SignUp() {
             <div className="signup-badge">{lang === "hin" ? "✨ नया खाता" : "✨ NEW ACCOUNT"}</div>
             <h1 className="signup-title">
               {lang === "hin" ? "साइनअप करें" : "Signup as"}{" "}
-              <span className="signup-highlight">{profileCategory}</span>
+              <span className="signup-highlight">
+                {profileCategory == "Vendor" ? "Service Provider" : profileCategory}
+              </span>
             </h1>
             <p className="signup-subtitle">
               {lang === "hin"
@@ -752,12 +817,12 @@ export default function SignUp() {
               <span className="step-label">{lang === "hin" ? "जानकारी" : "Details"}</span>
             </div>
             <div className="step-line" />
-            <div className="step">
+            <div className={`step ${uiState.verifyPhoneNo ? "active" : ""}`}>
               <span className="step-number">2</span>
               <span className="step-label">{lang === "hin" ? "सत्यापन" : "Verify"}</span>
             </div>
             <div className="step-line" />
-            <div className="step">
+            <div className={`step ${uiState.isSignupComplete ? "active" : ""}`}>
               <span className="step-number">3</span>
               <span className="step-label">{lang === "hin" ? "पूर्ण" : "Complete"}</span>
             </div>
@@ -1177,17 +1242,22 @@ export default function SignUp() {
                 <div className="vendor-payment-icon">💳</div>
                 <div className="vendor-payment-content">
                   <strong>
-                    {lang === "hin" ? "वेंडर खाता निर्माण शुल्क" : "Vendor Account Creation Fee"}
+                    {_t(
+                      "Service Provider Account Creation Fee",
+                      "सर्विस प्रोवाइडर खाता निर्माण शुल्क",
+                    )}
                   </strong>
                   <p>
-                    {lang === "hin"
-                      ? "साइनअप पूरा करने के लिए ₹50 भुगतान करें।"
-                      : "Pay ₹50 to complete vendor signup."}
+                    {_t(
+                      "Pay ₹50 to complete service provider signup.",
+                      "सर्विस प्रोवाइडर साइनअप पूरा करने के लिए ₹50 भुगतान करें।",
+                    )}
                   </p>
                   <small>
-                    {lang === "hin"
-                      ? "₹50 आपके वेंडर बैलेंस में जोड़ दिए जाएंगे।"
-                      : "₹50 will be added to your vendor balance."}
+                    {_t(
+                      "₹50 will be added to your service provider balance.",
+                      "₹50 आपके सर्विस प्रोवाइडर बैलेंस में जोड़ दिए जाएंगे।",
+                    )}
                   </small>
                 </div>
                 <div className="vendor-payment-amount">₹50</div>
@@ -1244,7 +1314,12 @@ export default function SignUp() {
             {/* Login */}
             <div className="signup-login">
               <span>{lang === "hin" ? "पहले से खाता है?" : "Already have an account?"}</span>
-              <button onClick={handleLogin} className="signup-login-btn" type="button">
+              <button
+                onClick={handleLogin}
+                className="signup-login-btn"
+                type="button"
+                style={{ marginLeft: "10px" }}
+              >
                 {lang === "hin" ? "लॉगिन करें" : "Login"} →
               </button>
             </div>

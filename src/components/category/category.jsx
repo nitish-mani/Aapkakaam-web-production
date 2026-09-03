@@ -70,8 +70,8 @@ export default function Category() {
       bg: "#eff6ff",
     },
     {
-      label: "Continue As a Vendor",
-      labelHindi: "वेंडर के रूप में जारी रखें",
+      label: "Continue As a Service Provider",
+      labelHindi: "सर्विस प्रोवाइडर के रूप में जारी रखें",
       type: "vendor",
       icon: "🔧",
       description: "Offer services & grow your business",

@@ -516,6 +516,7 @@
 }
 
 .download-button-arrow {
+  align-self: flex-start;
   padding-right: 4px;
 
   font-size: 21px;

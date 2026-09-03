@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./AppDownloadPrompt.css";
 
-const APK_DOWNLOAD_URL = "https://download.aapkakaam.com/android/app-release-1.0.1.apk";
+const APK_DOWNLOAD_URL = "https://download.aapkakaam.com/android/app-release-1.0.2.apk";
 
 const AppDownloadPrompt = ({ phoneNo, language = "hi" }) => {
   const [stage, setStage] = useState("corner");
@@ -180,7 +180,7 @@ const AppDownloadPrompt = ({ phoneNo, language = "hi" }) => {
               DOWNLOAD BUTTON
           ================================================= */}
 
-          {/* <button type="button" className="app-download-main-button" onClick={handleDownload}>
+          <button type="button" className="app-download-main-button" onClick={handleDownload}>
             <span className="download-button-icon">↓</span>
 
             <span className="download-button-content">
@@ -190,14 +190,14 @@ const AppDownloadPrompt = ({ phoneNo, language = "hi" }) => {
             </span>
 
             <span className="download-button-arrow">→</span>
-          </button> */}
-          <a
-            href="https://download.aapkakaam.com/android/app-release-1.0.1.apk"
+          </button>
+          {/* <a
+            href="https://download.aapkakaam.com/android/app-release.apk"
             target="_blank"
             rel="noopener noreferrer"
           >
             Download APK
-          </a>
+          </a> */}
 
           {/* =================================================
               MAYBE LATER

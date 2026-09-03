@@ -64,6 +64,13 @@ export default function Login() {
   // ============================================================
   // LOCATION DATA
   // ============================================================
+  // Add this after the isHindi declaration
+  const _t = useCallback(
+    (en, hin) => {
+      return isHindi ? hin : en;
+    },
+    [isHindi],
+  );
 
   const { category, cd, id } = useMemo(() => location.state || {}, [location.state]);
 
@@ -155,6 +162,10 @@ export default function Login() {
   // LOGIN
   // ============================================================
 
+  // ============================================================
+  // LOGIN
+  // ============================================================
+
   const handleLogin = useCallback(async () => {
     // ----------------------------------------------------------
     // Phone validation
@@ -166,6 +177,42 @@ export default function Login() {
         isPhoneNoEmpty: false,
       }));
 
+      showError(_t("Please enter your mobile number", "कृपया अपना मोबाइल नंबर दर्ज करें"));
+      return;
+    }
+
+    // ----------------------------------------------------------
+    // Phone number length validation (10 digits)
+    // ----------------------------------------------------------
+
+    if (formData.phoneNo.length !== 10) {
+      setUiState((prev) => ({
+        ...prev,
+        isPhoneNoEmpty: false,
+      }));
+
+      showError(
+        _t(
+          "Please enter a valid 10-digit mobile number",
+          "कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें",
+        ),
+      );
+      return;
+    }
+
+    // ----------------------------------------------------------
+    // Phone number numeric validation
+    // ----------------------------------------------------------
+
+    if (!/^\d+$/.test(formData.phoneNo)) {
+      setUiState((prev) => ({
+        ...prev,
+        isPhoneNoEmpty: false,
+      }));
+
+      showError(
+        _t("Mobile number must contain only digits", "मोबाइल नंबर में केवल अंक होने चाहिए"),
+      );
       return;
     }
 
@@ -179,6 +226,23 @@ export default function Login() {
         isPassEmpty: false,
       }));
 
+      showError(_t("Please enter your password", "कृपया अपना पासवर्ड दर्ज करें"));
+      return;
+    }
+
+    // ----------------------------------------------------------
+    // Password length validation (minimum 6 characters)
+    // ----------------------------------------------------------
+
+    if (formData.pass.length < 6) {
+      setUiState((prev) => ({
+        ...prev,
+        isPassEmpty: false,
+      }));
+
+      showError(
+        _t("Password must be at least 6 characters", "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए"),
+      );
       return;
     }
 
@@ -187,8 +251,7 @@ export default function Login() {
     // ----------------------------------------------------------
 
     if (!navigator.onLine) {
-      showMessage("err", isHindi ? "आप ऑफलाइन हैं" : "You are offline");
-
+      showError(_t("You are offline", "आप ऑफलाइन हैं"));
       return;
     }
 
@@ -237,28 +300,29 @@ export default function Login() {
       // NAVIGATION
       // --------------------------------------------------------
 
-      /*
-       * Keep the popup visible while navigating.
-       *
-       * AppDownloadPrompt uses position: fixed, so it remains
-       * above the new page after navigation.
-       */
-
       setTimeout(() => {
         navigate("/");
       }, 800);
     } catch (error) {
       console.error("Login error:", error);
 
-      showError(error.response?.data?.message || (isHindi ? "लॉगिन विफल" : "Login failed"));
+      showError(error.response?.data?.message || _t("Login failed", "लॉगिन विफल"));
     } finally {
       setUiState((prev) => ({
         ...prev,
         isLoading: false,
       }));
     }
-  }, [formData.phoneNo, formData.pass, category, dispatch, navigate, showMessage, isHindi]);
-
+  }, [
+    formData.phoneNo,
+    formData.pass,
+    category,
+    dispatch,
+    navigate,
+    showError,
+    showSuccess,
+    isHindi,
+  ]);
   // ============================================================
   // FORGOT PASSWORD
   // ============================================================
@@ -341,7 +405,9 @@ export default function Login() {
 
             <h1>
               {isHindi ? "लॉगिन करें" : "Login to"}{" "}
-              <span className="highlight">{profileCategory}</span>
+              <span className="highlight">
+                {profileCategory == "Vendor" ? "Service Provider" : profileCategory}
+              </span>
             </h1>
 
             <p>
