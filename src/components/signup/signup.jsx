@@ -640,7 +640,7 @@ export default function SignUp() {
                 ),
                 3500,
               );
-              isSignupComplete = true;
+              setUiState((prev) => ({ ...prev, isSignupComplete: true }));
               setTimeout(() => {
                 navigate("/login", { state: { category: "vendor" } });
               }, 3500);
@@ -697,7 +697,7 @@ export default function SignUp() {
       );
 
       showSuccess(result.data?.message || _t("Signup successful", "साइनअप सफल"));
-      isSignupComplete = true;
+      setUiState((prev) => ({ ...prev, isSignupComplete: true }));
       setTimeout(() => {
         navigate("/login", { state: { category } });
       }, 2000);
