@@ -166,7 +166,68 @@ Sent from AapkaKaam Contact Form
             </div>
           </div>
         )}
+        {/* Account Deletion Information */}
+        <div className="account-deletion-info">
+          <div className="account-deletion-icon">🗑️</div>
 
+          <div>
+            <h2>{t("Account Deletion Request", "अकाउंट हटाने का अनुरोध")}</h2>
+
+            <p>
+              {t(
+                "Users and vendors can request the deletion of their AapkaKaam account using the contact form below.",
+                "यूजर और वेंडर नीचे दिए गए संपर्क फॉर्म का उपयोग करके अपना AapkaKaam अकाउंट हटाने का अनुरोध कर सकते हैं।",
+              )}
+            </p>
+
+            <div className="deletion-steps">
+              <h3>{t("How to request account deletion:", "अकाउंट हटाने का अनुरोध कैसे करें:")}</h3>
+
+              <ol>
+                <li>
+                  {t(
+                    'Enter "Account Deletion Request" in the Subject field.',
+                    'Subject में "Account Deletion Request" लिखें।',
+                  )}
+                </li>
+
+                <li>
+                  {t(
+                    "Provide the mobile number registered with your AapkaKaam account.",
+                    "अपने AapkaKaam अकाउंट से जुड़े रजिस्टर्ड मोबाइल नंबर की जानकारी दें।",
+                  )}
+                </li>
+
+                <li>
+                  {t(
+                    "Mention whether your account is a User or Vendor account.",
+                    "बताएं कि आपका अकाउंट User है या Vendor।",
+                  )}
+                </li>
+
+                <li>
+                  {t(
+                    "Our team will verify your request and process the account deletion.",
+                    "हमारी टीम आपके अनुरोध को सत्यापित करने के बाद अकाउंट हटाने की प्रक्रिया पूरी करेगी।",
+                  )}
+                </li>
+              </ol>
+            </div>
+
+            <p className="deletion-note">
+              {t(
+                "Some information may be retained where required for legal, accounting, fraud prevention, or other legitimate purposes.",
+                "कानूनी, अकाउंटिंग, धोखाधड़ी रोकथाम या अन्य वैध उद्देश्यों के लिए कुछ जानकारी आवश्यकतानुसार रखी जा सकती है।",
+              )}
+              <p>
+                {t(
+                  "Account deletion requests are generally processed within 30 days after verification.",
+                  "सत्यापन के बाद अकाउंट हटाने के अनुरोध सामान्यतः 30 दिनों के भीतर प्रोसेस किए जाते हैं।",
+                )}
+              </p>
+            </p>
+          </div>
+        </div>
         {/* Contact Form */}
         <div className="contact-form-wrapper">
           <div className="contact-form-header">
@@ -199,9 +260,7 @@ Sent from AapkaKaam Contact Form
               </div>
 
               <div className="form-group">
-                <label htmlFor="email">
-                  {t("Email Address", "ईमेल पता")} <span className="required">*</span>
-                </label>
+                <label htmlFor="email">{t("Email Address", "ईमेल पता")}</label>
                 <div className="input-wrapper">
                   <span className="input-icon">📧</span>
                   <input
@@ -220,7 +279,9 @@ Sent from AapkaKaam Contact Form
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="phone">{t("Phone Number", "फोन नंबर")}</label>
+                <label htmlFor="phone">
+                  {t("Phone Number", "फोन नंबर")} <span className="required">*</span>
+                </label>
                 <div className="input-wrapper">
                   <span className="input-icon">📱</span>
                   <input

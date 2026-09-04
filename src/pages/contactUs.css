@@ -611,3 +611,194 @@
   font-size: 13px;
   color: #991b1b;
 }
+
+/* =========================================================
+   ACCOUNT DELETION INFORMATION
+========================================================= */
+
+.account-deletion-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+
+  margin: 24px 0;
+  padding: 22px;
+
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+
+  transition: all 0.3s ease;
+}
+
+.account-deletion-info:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+/* ===== ICON ===== */
+
+.account-deletion-icon {
+  width: 54px;
+  height: 54px;
+
+  min-width: 54px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 25px;
+
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(124, 58, 237, 0.12));
+
+  border-radius: 16px;
+}
+
+/* ===== CONTENT ===== */
+
+.account-deletion-info h2 {
+  margin: 0 0 10px;
+
+  font-size: 20px;
+  font-weight: 700;
+
+  color: #0f172a;
+}
+
+.account-deletion-info p {
+  margin: 0;
+
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.7;
+
+  color: #64748b;
+}
+
+/* ===== STEPS ===== */
+
+.deletion-steps {
+  margin: 18px 0;
+  padding: 18px;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
+.deletion-steps h3 {
+  margin: 0 0 12px;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  color: #0f172a;
+}
+
+.deletion-steps ol {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.deletion-steps li {
+  margin-bottom: 10px;
+
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+
+  color: #475569;
+}
+
+.deletion-steps li:last-child {
+  margin-bottom: 0;
+}
+
+.deletion-steps li::marker {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+/* ===== DATA RETENTION NOTE ===== */
+
+.deletion-note {
+  margin: 0 !important;
+  padding: 14px 16px !important;
+
+  font-size: 13px !important;
+  font-weight: 500;
+
+  line-height: 1.6;
+
+  background: #eff6ff;
+
+  color: #475569 !important;
+
+  border-left: 4px solid #2563eb;
+  border-radius: 10px;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 768px) {
+  .account-deletion-info {
+    flex-direction: column;
+
+    gap: 14px;
+    margin: 20px 0;
+    padding: 18px;
+  }
+
+  .account-deletion-icon {
+    width: 50px;
+    height: 50px;
+
+    min-width: 50px;
+
+    font-size: 23px;
+    border-radius: 14px;
+  }
+
+  .account-deletion-info h2 {
+    font-size: 18px;
+  }
+
+  .account-deletion-info p,
+  .deletion-steps li {
+    font-size: 13px;
+  }
+
+  .deletion-steps {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .account-deletion-info {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .account-deletion-info h2 {
+    font-size: 17px;
+  }
+
+  .deletion-steps {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .deletion-steps h3 {
+    font-size: 14px;
+  }
+
+  .deletion-note {
+    padding: 12px 14px !important;
+    font-size: 12px !important;
+  }
+}

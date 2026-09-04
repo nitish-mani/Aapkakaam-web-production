@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 const API_URL = import.meta.env.VITE_API_URL;
-
+console.log("API_URL", API_URL);
 const INITIAL_MAINTENANCE = {
   status: "inactive",
   active: false,
@@ -20,10 +20,15 @@ export default function useWebsiteMaintenance() {
 
   const checkMaintenance = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/website-maintenance/status?platform=website`, {
+      const url = `${API_URL}/website-maintenance/status?platform=website` + `&_t=${Date.now()}`;
+
+      const response = await fetch(url, {
         method: "GET",
+        cache: "no-store",
         headers: {
           Accept: "application/json",
+          "Cache-Control": "no-cache, no-store, max-age=0",
+          Pragma: "no-cache",
         },
       });
 
@@ -32,7 +37,6 @@ export default function useWebsiteMaintenance() {
       }
 
       const result = await response.json();
-
       const maintenanceData = result?.maintenance;
 
       if (!maintenanceData) {
@@ -47,8 +51,6 @@ export default function useWebsiteMaintenance() {
     } catch (error) {
       console.error("Maintenance check failed:", error);
 
-      // Fail open:
-      // If maintenance API fails, do not block website users.
       setMaintenance((previous) => ({
         ...previous,
         active: false,
