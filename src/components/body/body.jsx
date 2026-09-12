@@ -4195,16 +4195,6 @@ export default function Body() {
         <span className="ai-btn-icon">{aiOpen ? "✕" : "🤖"}</span>
         {!aiOpen && <span className="ai-btn-label">AI</span>}
       </button>
-      {/* ========================================================
-          APP DOWNLOAD POPUP
-
-          IMPORTANT:
-          Only render when showAppDownload === true.
-          ======================================================== */}
-
-      {showAppDownload && (
-        <AppDownloadPrompt phoneNo={phoneNo} language={lang === "hin" ? "hi" : "en"} />
-      )}
     </main>
   );
 }

@@ -130,7 +130,7 @@ export default function Footer() {
               <img src={appStore} alt={isHindi ? t.links.appStore.hi : t.links.appStore.en} />
             </a>
             <a
-              href="#"
+              href="https://play.google.com/store/apps/details?id=com.aapkakaam.app"
               className="app-badge"
               aria-label={isHindi ? t.links.playStore.hi : t.links.playStore.en}
             >
