@@ -84,7 +84,8 @@ export default function SignUp() {
   });
 
   const [otpId, setOtpId] = useState("");
-
+  const [vendorSignupFee, setVendorSignupFee] = useState(50);
+  const [isSignupFeeLoading, setIsSignupFeeLoading] = useState(true);
   const validPhoneNoId = useSelector((state) => state.category.validPhoneNoId);
 
   // ============================================================
@@ -392,6 +393,50 @@ export default function SignUp() {
     lang,
   ]);
 
+  useEffect(() => {
+    if (category !== "vendor") {
+      setIsSignupFeeLoading(false);
+      return;
+    }
+
+    let isActive = true;
+
+    const fetchVendorSignupFee = async () => {
+      try {
+        const response = await axios.get(`${SERVER_URL}/signup-fees`, { timeout: 10000 });
+
+        const data = response.data;
+
+        if (!data?.success) {
+          throw new Error(data?.message || "Unable to fetch vendor signup fee");
+        }
+
+        const fee = Number(data.fees.vendor.amountRupees);
+
+        if (!Number.isFinite(fee) || fee < 0) {
+          throw new Error("Invalid vendor signup fee received");
+        }
+
+        if (isActive) {
+          setVendorSignupFee(fee);
+        }
+      } catch (error) {
+        console.error("Failed to fetch vendor signup fee:", error);
+        // Keep the existing fallback fee of ₹50.
+      } finally {
+        if (isActive) {
+          setIsSignupFeeLoading(false);
+        }
+      }
+    };
+
+    fetchVendorSignupFee();
+
+    return () => {
+      isActive = false;
+    };
+  }, [category]);
+
   // ============================================================
   // SIGNUP
   // ============================================================
@@ -537,12 +582,12 @@ export default function SignUp() {
 
     try {
       // ============================================================
-      // VENDOR SIGNUP WITH PAYMENT
+      // VENDOR SIGNUP — FREE OR PAID
       // ============================================================
 
       if (category === "vendor") {
         const jobs = [
-          ...new Set(formData.jobs.map((job) => String(job || "").trim()).filter(Boolean)),
+          ...new Set((formData.jobs || []).map((job) => String(job || "").trim()).filter(Boolean)),
         ];
 
         if (jobs.length === 0) {
@@ -572,17 +617,82 @@ export default function SignUp() {
             validPhoneNoId: validPhoneNoId || "",
             agreedToTnCnP: true,
           },
-          { headers: { "Content-Type": "application/json" }, timeout: 15000 },
+          {
+            headers: { "Content-Type": "application/json" },
+            timeout: 20000,
+          },
         );
 
-        if (!response.data?.success || !response.data?.order || !response.data?.signupToken) {
+        const data = response.data;
+
+        if (!data?.success) {
+          throw new Error(data?.message || _t("Vendor signup failed", "वेंडर साइनअप विफल हो गया"));
+        }
+
+        // ========================================================
+        // READ BACKEND FEE
+        // ========================================================
+
+        const fee = Number(vendorSignupFee);
+
+        if (!Number.isFinite(fee) || fee < 0) {
+          throw new Error(_t("Invalid signup fee", "साइनअप शुल्क अमान्य है"));
+        }
+
+        // ========================================================
+        // FREE SIGNUP — ACCOUNT ALREADY CREATED BY BACKEND
+        // ========================================================
+
+        const isFreeSignup = data.isFreeSignup === true || fee === 0;
+
+        if (isFreeSignup) {
+          if (!data.vendorId) {
+            throw new Error(
+              _t("Vendor ID was not returned by server", "सर्वर से वेंडर ID नहीं मिली"),
+            );
+          }
+
+          showSuccess(
+            data.message ||
+              _t(
+                "Registration successful! Your vendor account has been created.",
+                "रजिस्ट्रेशन सफल! आपका वेंडर अकाउंट बन गया है।",
+              ),
+            _t("Success", "सफल"),
+          );
+
+          setUiState((prev) => ({
+            ...prev,
+            isSignupComplete: true,
+            isLoading: false,
+          }));
+
+          setTimeout(() => {
+            navigate("/login", {
+              state: { category: "vendor" },
+            });
+          }, 3500);
+
+          return;
+        }
+
+        // ========================================================
+        // PAID SIGNUP — VALIDATE PAYMENT ORDER
+        // ========================================================
+
+        const { order, signupToken } = data;
+
+        if (!signupToken) {
           throw new Error(
-            response.data?.message ||
-              _t("Unable to create payment order", "भुगतान ऑर्डर बनाने में समस्या हुई"),
+            _t("Signup token was not returned by server", "सर्वर से साइनअप टोकन नहीं मिला"),
           );
         }
 
-        const { order, signupToken } = response.data;
+        if (!order || !order.id || !order.key || order.amount == null) {
+          throw new Error(
+            _t("Invalid payment order received from server", "सर्वर से अमान्य भुगतान ऑर्डर मिला"),
+          );
+        }
 
         if (typeof window === "undefined" || !window.Razorpay) {
           throw new Error(_t("Razorpay is not loaded", "Razorpay लोड नहीं हुआ है"));
@@ -593,18 +703,26 @@ export default function SignUp() {
           amount: order.amount,
           currency: order.currency || "INR",
           name: "Aapkakaam",
-          description: _t("Vendor Registration Fee ₹50", "वेंडर रजिस्ट्रेशन शुल्क ₹50"),
+          description: _t(`Vendor Registration Fee ₹${fee}`, `वेंडर रजिस्ट्रेशन शुल्क ₹${fee}`),
           order_id: order.id,
+
           prefill: {
             name: formData.name.trim(),
             contact: String(formData.phoneNo).trim(),
           },
-          notes: { purpose: "vendor_signup" },
+
+          notes: {
+            purpose: "vendor_signup",
+          },
+
           theme: { color: "#4F46E5" },
 
           handler: async (paymentResponse) => {
             try {
-              setUiState((prev) => ({ ...prev, isLoading: true }));
+              setUiState((prev) => ({
+                ...prev,
+                isLoading: true,
+              }));
 
               if (
                 !paymentResponse?.razorpay_payment_id ||
@@ -622,42 +740,63 @@ export default function SignUp() {
                   razorpay_order_id: paymentResponse.razorpay_order_id,
                   razorpay_signature: paymentResponse.razorpay_signature,
                 },
-                { headers: { "Content-Type": "application/json" }, timeout: 20000 },
+                {
+                  headers: { "Content-Type": "application/json" },
+                  timeout: 20000,
+                },
               );
 
-              const data = verifyResponse.data;
+              const verified = verifyResponse.data;
 
-              if (!data?.success) {
+              if (!verified?.success) {
                 throw new Error(
-                  data?.message || _t("Payment verification failed", "भुगतान सत्यापन विफल"),
+                  verified?.message || _t("Payment verification failed", "भुगतान सत्यापन विफल"),
                 );
               }
 
               showSuccess(
-                _t(
-                  "₹50 payment successful! Your vendor account has been created and ₹50 has been added to your balance.",
-                  "₹50 भुगतान सफल! आपका वेंडर अकाउंट बन गया है और ₹50 बैलेंस में जोड़ दिए गए हैं।",
-                ),
-                3500,
+                verified.message ||
+                  _t(
+                    `Payment of ₹${fee} successful! Your vendor account has been created.`,
+                    `₹${fee} का भुगतान सफल! आपका वेंडर अकाउंट बन गया है।`,
+                  ),
+                _t("Success", "सफल"),
               );
-              setUiState((prev) => ({ ...prev, isSignupComplete: true }));
+
+              setUiState((prev) => ({
+                ...prev,
+                isSignupComplete: true,
+                isLoading: false,
+              }));
+
               setTimeout(() => {
-                navigate("/login", { state: { category: "vendor" } });
+                navigate("/login", {
+                  state: { category: "vendor" },
+                });
               }, 3500);
             } catch (error) {
               console.error("Vendor signup payment verification error:", error);
+
               showError(
                 error?.response?.data?.message ||
                   error?.message ||
                   _t("Payment verification failed", "भुगतान सत्यापन विफल"),
               );
-              setUiState((prev) => ({ ...prev, isLoading: false }));
+
+              setUiState((prev) => ({
+                ...prev,
+                isLoading: false,
+              }));
             }
           },
 
           modal: {
             ondismiss: () => {
-              setUiState((prev) => ({ ...prev, isLoading: false }));
+              setUiState((prev) => ({
+                ...prev,
+                isLoading: false,
+              }));
+
               showError(_t("Payment cancelled", "भुगतान रद्द कर दिया गया"));
             },
           },
@@ -665,10 +804,15 @@ export default function SignUp() {
 
         const razorpay = new window.Razorpay(razorpayOptions);
 
-        razorpay.on("payment.failed", (response) => {
-          console.error("Vendor signup payment failed:", response);
-          setUiState((prev) => ({ ...prev, isLoading: false }));
-          showError(response?.error?.description || _t("Payment failed", "भुगतान विफल हो गया"));
+        razorpay.on("payment.failed", (paymentError) => {
+          console.error("Vendor signup payment failed:", paymentError);
+
+          setUiState((prev) => ({
+            ...prev,
+            isLoading: false,
+          }));
+
+          showError(paymentError?.error?.description || _t("Payment failed", "भुगतान विफल हो गया"));
         });
 
         razorpay.open();
@@ -717,6 +861,7 @@ export default function SignUp() {
     showSuccess,
     agreed,
     uiState.isLoading,
+    vendorSignupFee,
     _t,
     MAX_JOBS,
   ]);
@@ -1237,41 +1382,128 @@ export default function SignUp() {
             </div>
 
             {/* Payment Info */}
-            {category === "vendor" && (
-              <div className="vendor-payment-card">
-                <div className="vendor-payment-icon">💳</div>
-                <div className="vendor-payment-content">
-                  <strong>
-                    {_t(
-                      "Service Provider Account Creation Fee",
-                      "सर्विस प्रोवाइडर खाता निर्माण शुल्क",
-                    )}
-                  </strong>
-                  <p>
-                    {_t(
-                      "Pay ₹50 to complete service provider signup.",
-                      "सर्विस प्रोवाइडर साइनअप पूरा करने के लिए ₹50 भुगतान करें।",
-                    )}
-                  </p>
-                  <small>
-                    {_t(
-                      "₹50 will be added to your service provider balance.",
-                      "₹50 आपके सर्विस प्रोवाइडर बैलेंस में जोड़ दिए जाएंगे।",
-                    )}
-                  </small>
-                </div>
-                <div className="vendor-payment-amount">₹50</div>
-              </div>
-            )}
+            {category === "vendor" &&
+              (() => {
+                const originalFee = 50;
+                const finalFee = Math.max(Number(vendorSignupFee) || 0, 0);
+                const discount = Math.max(originalFee - finalFee, 0);
+
+                return (
+                  <div className="vendor-payment-card">
+                    {/* Icon */}
+                    <div className="vendor-payment-icon">
+                      {finalFee === 0 ? "🎉" : discount > 0 ? "🏷️" : "💳"}
+                    </div>
+
+                    {/* Content */}
+                    <div className="vendor-payment-content">
+                      <strong>
+                        {_t(
+                          "Service Provider Account Creation Fee",
+                          "सर्विस प्रोवाइडर खाता निर्माण शुल्क",
+                        )}
+                      </strong>
+
+                      {/* Original fee and discount */}
+                      {discount > 0 && (
+                        <p>
+                          <span
+                            style={{
+                              textDecoration: "line-through",
+                              color: "#6B7280",
+                              marginRight: "8px",
+                            }}
+                          >
+                            ₹{originalFee}
+                          </span>
+
+                          <span
+                            style={{
+                              color: "#16A34A",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {_t(`Save ₹${discount}`, `₹${discount} की बचत`)}
+                          </span>
+                        </p>
+                      )}
+
+                      {/* Fee message */}
+                      <p>
+                        {finalFee > 0
+                          ? _t(
+                              `Pay ₹${finalFee} to complete service provider signup.`,
+                              `सर्विस प्रोवाइडर साइनअप पूरा करने के लिए ₹${finalFee} भुगतान करें।`,
+                            )
+                          : _t(
+                              "Register as a service provider for free.",
+                              "सर्विस प्रोवाइडर के रूप में निःशुल्क रजिस्ट्रेशन करें।",
+                            )}
+                      </p>
+
+                      {/* Balance information */}
+                      {finalFee > 0 && (
+                        <small>
+                          {_t(
+                            `₹${finalFee} will be added to your service provider balance.`,
+                            `₹${finalFee} आपके सर्विस प्रोवाइडर बैलेंस में जोड़ दिए जाएंगे।`,
+                          )}
+                        </small>
+                      )}
+
+                      {/* Discount percentage */}
+                      {discount > 0 && (
+                        <small
+                          style={{
+                            display: "block",
+                            color: "#16A34A",
+                            fontWeight: 600,
+                            marginTop: "6px",
+                          }}
+                        >
+                          {Math.round((discount / originalFee) * 100)}%{" "}
+                          {_t("discount applied", "की छूट लागू")}
+                        </small>
+                      )}
+                    </div>
+
+                    {/* Final amount */}
+                    <div className="vendor-payment-amount">
+                      {finalFee > 0 ? (
+                        <>
+                          {discount > 0 && (
+                            <div
+                              style={{
+                                textDecoration: "line-through",
+                                color: "#6B7280",
+                                fontSize: "13px",
+                                fontWeight: 400,
+                              }}
+                            >
+                              ₹{originalFee}
+                            </div>
+                          )}
+
+                          <div>₹{finalFee}</div>
+                        </>
+                      ) : (
+                        _t("FREE", "निःशुल्क")
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
 
             {/* Submit Button */}
             <button
               className={`signup-submit-btn ${uiState.isLoading ? "signup-submit-loading" : ""}`}
               onClick={handleSignup}
-              disabled={uiState.isLoading}
+              disabled={uiState.isLoading || (category === "vendor" && isSignupFeeLoading)}
               type="button"
             >
-              {uiState.isLoading ? (
+              {category === "vendor" && isSignupFeeLoading ? (
+                _t("Loading signup fee...", "साइनअप शुल्क लोड हो रहा है...")
+              ) : uiState.isLoading ? (
                 <>
                   <span className="signup-loader" />
                   <span>
@@ -1288,9 +1520,13 @@ export default function SignUp() {
                 <>
                   <span>
                     {category === "vendor"
-                      ? lang === "hin"
-                        ? "₹50 भुगतान करके खाता बनाएं"
-                        : "Pay ₹50 & Signup"
+                      ? vendorSignupFee > 0
+                        ? lang === "hin"
+                          ? `₹${vendorSignupFee} भुगतान करके खाता बनाएं`
+                          : `Pay ₹${vendorSignupFee} & Signup`
+                        : lang === "hin"
+                          ? "निःशुल्क खाता बनाएं"
+                          : "Signup for Free"
                       : lang === "hin"
                         ? "खाता बनाएं"
                         : "Signup"}

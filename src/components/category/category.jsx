@@ -95,6 +95,31 @@ export default function Category() {
           <div className="category-modern-badge">
             {lang === "hin" ? "🔐 स्वागत है" : "🔐 WELCOME"}
           </div>
+
+          {/* YouTube Tutorial Video */}
+          <div className="category-video-section">
+            <h2>
+              {lang === "hin" ? "📺 Aapkakaam कैसे इस्तेमाल करें?" : "📺 How to Use Aapkakaam?"}
+            </h2>
+
+            <p>
+              {lang === "hin"
+                ? "शुरू करने से पहले यह वीडियो देखें"
+                : "Watch this video before getting started"}
+            </p>
+
+            <div className="category-video-wrapper">
+              <iframe
+                src="https://www.youtube-nocookie.com/embed/7whLdJlnihM"
+                title="How to Use Aapkakaam"
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          </div>
+
           <h1>
             {lang === "hin" ? "अपनी" : "Choose Your"}{" "}
             <span className="highlight">{lang === "hin" ? "भूमिका" : "Role"}</span>{" "}
