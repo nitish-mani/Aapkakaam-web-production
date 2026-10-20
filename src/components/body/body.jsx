@@ -3233,6 +3233,7 @@ export default function Body() {
 
   const lang = useSelector((store) => store.category.selectLanguage);
 
+  const [homeBanner, setHomeBanner] = useState(null);
   const [search, setSearch] = useState("");
   const [showAll, setShowAll] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
@@ -3264,6 +3265,41 @@ export default function Body() {
 
   const phoneNo = userData[0]?.phoneNo;
 
+  // Fetch public home banner from backend
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchHomeBanner = async () => {
+      try {
+        const response = await axios.get(`${SERVER_URL}/home-banner`);
+
+        if (!isMounted || !response.data?.success) {
+          return;
+        }
+
+        const banner = response.data.banner;
+
+        if (banner?.enabled === true && banner?.imageUrl) {
+          setHomeBanner(banner);
+        } else {
+          setHomeBanner(null);
+        }
+      } catch (error) {
+        console.error("Failed to fetch home banner:", error.response?.data || error.message);
+
+        // Banner failure must not block the homepage
+        if (isMounted) {
+          setHomeBanner(null);
+        }
+      }
+    };
+
+    fetchHomeBanner();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
   // --------------------------------------------------------
   // CHECK WHETHER APP DOWNLOAD POPUP SHOULD SHOW
   // --------------------------------------------------------
@@ -3632,6 +3668,36 @@ export default function Body() {
 
   return (
     <main className="modern-body body-with-global-nav" ref={mainRef}>
+      {/* Dynamic Home Banner */}
+      {homeBanner?.enabled && homeBanner?.imageUrl && (
+        <section className="home-banner" aria-label="Aapkakaam home banner">
+          {homeBanner.clickUrl ? (
+            <a
+              href={homeBanner.clickUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="home-banner-link"
+              aria-label="Open banner link"
+            >
+              <img
+                src={homeBanner.imageUrl}
+                alt="Aapkakaam promotional banner"
+                className="home-banner-image"
+                loading="eager"
+                fetchPriority="high"
+              />
+            </a>
+          ) : (
+            <img
+              src={homeBanner.imageUrl}
+              alt="Aapkakaam promotional banner"
+              className="home-banner-image"
+              loading="eager"
+              fetchPriority="high"
+            />
+          )}
+        </section>
+      )}
       {/* ========== HERO ========== */}
       <section className="modern-hero">
         <div className="hero-bg">
